@@ -1,0 +1,50 @@
+{
+  "name": "coding-agent-benchmarks",
+  "version": "0.1.0",
+  "description": "Open-source framework for evaluating coding agents (GitHub Copilot CLI, Claude Code, etc.) against coding standards and best practices",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "coding-agent-benchmarks": "dist/runner.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/runner.ts",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Tests not implemented yet\" && exit 0"
+  },
+  "keywords": [
+    "coding-agent",
+    "benchmark",
+    "evaluation",
+    "copilot",
+    "claude-code",
+    "ai",
+    "testing",
+    "code-quality"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/coding-agent-benchmarks"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "commander": "^13.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

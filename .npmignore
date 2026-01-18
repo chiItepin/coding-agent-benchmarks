@@ -1,0 +1,8 @@
+src/
+tsconfig.json
+*.test.ts
+.github/
+examples/
+node_modules/
+.benchmarks/
+*.log
