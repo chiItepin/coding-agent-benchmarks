@@ -29,6 +29,24 @@ export class BuildScriptValidator implements CodeValidator {
     const buildCommand = options.command || 'npm run build';
     const workingDir = options.cwd || process.cwd();
 
+    // Validate command to prevent injection attacks
+    // Only allow npm/npx commands for safety in this example
+    if (!buildCommand.match(/^(npm|npx|yarn|pnpm)\s+/)) {
+      return {
+        passed: false,
+        score: 0,
+        violations: [
+          {
+            type: this.type,
+            message: 'Invalid build command',
+            severity: scenario.severity,
+            details: 'Only npm, npx, yarn, and pnpm commands are allowed for security reasons',
+          },
+        ],
+        validatorType: this.type,
+      };
+    }
+
     try {
       // Run the build script
       const output = execSync(buildCommand, {

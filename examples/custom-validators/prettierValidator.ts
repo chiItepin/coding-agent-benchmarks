@@ -4,7 +4,7 @@
  */
 
 import { CodeValidator, ValidationResult, TestScenario } from '../../src/types';
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -43,14 +43,13 @@ export class PrettierValidator implements CodeValidator {
           continue;
         }
 
-        // Run prettier --check on the file
-        try {
-          execSync(`npx prettier --check "${filePath}"`, {
-            cwd: this.workspaceRoot,
-            stdio: 'pipe',
-            encoding: 'utf-8',
-          });
-        } catch (error: any) {
+        // Run prettier --check on the file using spawn for security
+        const result = spawnSync('npx', ['prettier', '--check', filePath], {
+          cwd: this.workspaceRoot,
+          encoding: 'utf-8',
+        });
+
+        if (result.status !== 0) {
           // Prettier exits with code 1 if file is not formatted
           violations.push({
             type: this.type,

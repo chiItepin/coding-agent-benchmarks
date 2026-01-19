@@ -183,15 +183,29 @@ export class Evaluator {
 
       // Run custom validators
       for (const validator of this.customValidators) {
-        // Check if this validator should run for this scenario
-        const customConfig = scenario.validationStrategy.custom?.[validator.type];
-        if (customConfig?.enabled) {
-          const customResult = await validator.validate(generatedFiles, scenario);
-          validationResults.push(customResult);
+        try {
+          // Check if this validator should run for this scenario
+          const customConfig = scenario.validationStrategy.custom?.[validator.type];
+          if (customConfig?.enabled) {
+            const customResult = await validator.validate(generatedFiles, scenario);
+            validationResults.push(customResult);
 
-          if (this.options.verbose && customResult.score >= 0) {
-            console.log(`  ${validator.type}: ${customResult.score.toFixed(2)}`);
+            if (this.options.verbose && customResult.score >= 0) {
+              console.log(`  ${validator.type}: ${customResult.score.toFixed(2)}`);
+            }
           }
+        } catch (error) {
+          // Handle custom validator errors gracefully
+          if (this.options.verbose) {
+            console.error(`  ${validator.type}: Error - ${error}`);
+          }
+          validationResults.push({
+            passed: false,
+            score: 0,
+            violations: [],
+            validatorType: validator.type,
+            error: `Custom validator '${validator.type}' failed: ${error}`,
+          });
         }
       }
 
