@@ -24,8 +24,7 @@ src/
 │   ├── llmJudge.ts
 │   └── eslintValidator.ts
 ├── config/            # Configuration loading
-│   ├── loader.ts
-│   └── defaultScenarios.ts
+│   └── loader.ts
 ├── utils/             # Utility functions
 │   ├── gitUtils.ts
 │   ├── workspaceUtils.ts
@@ -89,27 +88,6 @@ export class MyAdapter implements CodeGenerationAdapter {
 3. Export the validator from `src/index.ts`
 4. Integrate into `src/evaluator.ts`
 5. Document in README.md
-
-### Adding Default Scenarios
-
-Add scenarios to `src/config/defaultScenarios.ts`:
-
-```typescript
-{
-  id: 'unique-scenario-id',
-  category: 'typescript',
-  severity: 'critical',
-  tags: ['tag1', 'tag2'],
-  description: 'Clear description of what this tests',
-  prompt: 'The prompt given to the coding agent',
-  validationStrategy: {
-    patterns: {
-      forbiddenPatterns: [/bad-pattern/],
-      requiredPatterns: [/good-pattern/],
-    },
-  },
-}
-```
 
 ## Testing
 

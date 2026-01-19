@@ -19,7 +19,11 @@ npm install --save-dev coding-agent-benchmarks
 
 ## Quick Start
 
-### 1. Check Adapter Availability
+### 1. Create a Configuration File
+
+Create a `benchmarks.config.js` file in your project root with your scenarios (see Configuration section below).
+
+### 2. Check Adapter Availability
 
 ```bash
 npx coding-agent-benchmarks check
@@ -27,13 +31,13 @@ npx coding-agent-benchmarks check
 
 This will show which coding agent CLIs are installed on your system.
 
-### 2. List Available Scenarios
+### 3. List Your Scenarios
 
 ```bash
 npx coding-agent-benchmarks list
 ```
 
-### 3. Run Evaluations
+### 4. Run Evaluations
 
 ```bash
 # Run all scenarios with default adapter (Copilot)
@@ -58,8 +62,8 @@ npx coding-agent-benchmarks evaluate --output report.json
 ```
 
 ## Configuration
-When you run the CLI, it looks for a config file where you can customize the scenarios, validators, model and adapters (coding agents) for your project.
-Create a `benchmarks.config.js` (or `.ts`) file in your project root:
+
+**Configuration is required.** Create a `benchmarks.config.js` (or `.ts`) file in your project root with your test scenarios:
 
 ```javascript
 module.exports = {
@@ -77,47 +81,57 @@ module.exports = {
   // Workspace root (auto-detected if not specified)
   workspaceRoot: process.cwd(),
 
-  // Custom scenarios
+  // Define your test scenarios
   scenarios: [
     {
-      id: 'custom-no-any',
+      id: 'typescript-no-any',
       category: 'typescript',
       severity: 'critical',
-      tags: ['typescript', 'types'],
-      description: 'Ensure no "any" types in User interfaces',
-      prompt: 'Create a User interface with name and email fields',
+      tags: ['typescript', 'types', 'safety'],
+      description: 'Ensure TypeScript interfaces use explicit types instead of "any"',
+      prompt: 'Create a TypeScript interface called User with fields: id (number), name (string), email (string), and metadata (object with key-value pairs)',
       validationStrategy: {
         patterns: {
           forbiddenPatterns: [/:\s*any\b/],
-          requiredPatterns: [/interface User/],
+          requiredPatterns: [/interface\s+User/],
+        },
+      },
+      timeout: 120000,
+    },
+    {
+      id: 'react-no-inline-styles',
+      category: 'react',
+      severity: 'major',
+      tags: ['react', 'styling', 'best-practices'],
+      description: 'Forbid inline style objects in React components',
+      prompt: 'Create a React functional component called Button that accepts a "label" prop and renders a styled button. Use CSS classes instead of inline styles.',
+      validationStrategy: {
+        patterns: {
+          forbiddenPatterns: [/style\s*=\s*\{\{/, /style\s*=\s*\{[^}]*\}/],
+          requiredPatterns: [/className/],
+        },
+      },
+    },
+    {
+      id: 'async-error-handling',
+      category: 'general',
+      severity: 'critical',
+      tags: ['async', 'error-handling', 'robustness'],
+      description: 'Ensure async functions have proper error handling',
+      prompt: 'Create an async function called fetchUserData that takes a userId parameter, makes an HTTP request to fetch user data, and returns the user object. Handle errors appropriately.',
+      validationStrategy: {
+        patterns: {
+          requiredPatterns: [/async\s+function\s+fetchUserData|const\s+fetchUserData.*async/, /try|catch|\.catch\(/],
+        },
+        llmJudge: {
+          enabled: true,
+          judgmentPrompt: 'Evaluate the error handling in this async function. Does it use try/catch or .catch()? Are errors logged or re-thrown appropriately?',
         },
       },
     },
   ],
 };
 ```
-
-## Built-in Scenarios
-
-The framework includes 9 default scenarios:
-
-### TypeScript
-
-- **typescript-no-any**: Forbid `any` type usage
-- **typescript-readonly-props**: Enforce readonly properties
-- **typescript-explicit-return-types**: Require explicit return type annotations
-- **typescript-strict-null-safety**: Proper null/undefined handling with optional chaining and type guards
-
-### React
-
-- **react-no-inline-styles**: Forbid inline style objects
-- **react-proper-hooks**: Ensure hooks follow Rules of Hooks
-- **react-key-prop**: Require unique key props in lists
-
-### General
-
-- **async-error-handling**: Ensure async functions have proper error handling
-- **no-console-logs-production**: Forbid console.log in production code
 
 ## Timeout Configuration
 

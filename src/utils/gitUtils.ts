@@ -9,7 +9,7 @@ import { execSync } from 'child_process';
  * @param workspaceRoot The workspace root directory
  * @returns Git status output
  */
-export function getGitStatusPorcelain(workspaceRoot: string): string {
+export const getGitStatusPorcelain = (workspaceRoot: string): string => {
   try {
     return execSync('git status --porcelain', {
       cwd: workspaceRoot,
@@ -19,7 +19,7 @@ export function getGitStatusPorcelain(workspaceRoot: string): string {
   } catch (error) {
     throw new Error(`Failed to get git status: ${error}`);
   }
-}
+};
 
 /**
  * Parse git status porcelain output to get changed files
@@ -54,16 +54,16 @@ export const parseGitStatus = (statusOutput: string): string[] => {
  * @param workspaceRoot The workspace root directory
  * @returns Array of file paths that were changed
  */
-export function getChangedFiles(workspaceRoot: string): string[] {
+export const getChangedFiles = (workspaceRoot: string): string[] => {
   const statusOutput = getGitStatusPorcelain(workspaceRoot);
   return parseGitStatus(statusOutput);
-}
+};
 
 /**
  * Get the git root directory
  * @returns Absolute path to git root
  */
-export function getGitRoot(): string {
+export const getGitRoot = (): string => {
   try {
     return execSync('git rev-parse --show-toplevel', {
       encoding: 'utf-8',
@@ -72,14 +72,14 @@ export function getGitRoot(): string {
   } catch (error) {
     throw new Error('Not inside a git repository');
   }
-}
+};
 
 /**
  * Check if a directory is inside a git repository
  * @param directory Directory to check
  * @returns True if inside a git repository
  */
-export function isGitRepository(directory: string): boolean {
+export const isGitRepository = (directory: string): boolean => {
   try {
     execSync('git rev-parse --git-dir', {
       cwd: directory,
@@ -90,14 +90,14 @@ export function isGitRepository(directory: string): boolean {
   } catch {
     return false;
   }
-}
+};
 
 /**
  * Reset git working directory to clean state (discard all changes)
  * WARNING: This will discard all uncommitted changes
  * @param workspaceRoot The workspace root directory
  */
-export function resetGitWorkingDirectory(workspaceRoot: string): void {
+export const resetGitWorkingDirectory = (workspaceRoot: string): void => {
   try {
     // Reset all tracked files
     execSync('git reset --hard HEAD', {
@@ -113,4 +113,4 @@ export function resetGitWorkingDirectory(workspaceRoot: string): void {
   } catch (error) {
     throw new Error(`Failed to reset git working directory: ${error}`);
   }
-}
+};

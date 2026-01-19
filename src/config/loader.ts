@@ -5,7 +5,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { BenchmarkConfig, TestScenario } from '../types';
-import { getDefaultScenarios } from './defaultScenarios';
 
 /**
  * Find configuration file in project directory
@@ -99,35 +98,6 @@ const validateConfig = (config: BenchmarkConfig): void => {
   }
 };
 
-/**
- * Merge user scenarios with default scenarios
- */
-const mergeScenarios = (
-  userScenarios: TestScenario[] | undefined,
-  defaultScenarios: TestScenario[]
-): TestScenario[] => {
-  if (!userScenarios || userScenarios.length === 0) {
-    return defaultScenarios;
-  }
-
-  // Create a map of user scenarios by ID
-  const userScenarioMap = new Map<string, TestScenario>();
-  for (const scenario of userScenarios) {
-    userScenarioMap.set(scenario.id, scenario);
-  }
-
-  // Start with user scenarios
-  const merged = [...userScenarios];
-
-  // Add default scenarios that aren't overridden
-  for (const defaultScenario of defaultScenarios) {
-    if (!userScenarioMap.has(defaultScenario.id)) {
-      merged.push(defaultScenario);
-    }
-  }
-
-  return merged;
-};
 
 /**
  * Load benchmark configuration
@@ -140,37 +110,33 @@ export const loadConfig = async (cwd: string = process.cwd()): Promise<{
   // Find config file
   const configPath = findConfigFile(cwd);
 
-  let userConfig: BenchmarkConfig = {};
-
-  // Load user config if found
-  if (configPath) {
-    try {
-      userConfig = await loadConfigFromFile(configPath);
-      validateConfig(userConfig);
-      console.log(`Loaded config from: ${configPath}`);
-    } catch (error) {
-      console.error(`Error loading config: ${error}`);
-      console.log('Falling back to default scenarios');
-    }
-  } else {
-    console.log('No config file found, using default scenarios');
+  if (!configPath) {
+    throw new Error(
+      'No config file found. Please create a benchmarks.config.js file with scenarios defined.'
+    );
   }
 
-  // Get default scenarios
-  const defaultScenarios = getDefaultScenarios();
+  let config: BenchmarkConfig = {};
 
-  // Merge scenarios
-  const scenarios = mergeScenarios(userConfig.scenarios, defaultScenarios);
+  // Load user config
+  try {
+    config = await loadConfigFromFile(configPath);
+    validateConfig(config);
+    console.log(`Loaded config from: ${configPath}`);
+  } catch (error) {
+    throw new Error(`Failed to load config: ${error}`);
+  }
 
-  // Return full config with merged scenarios
-  const config: BenchmarkConfig = {
-    ...userConfig,
-    scenarios,
-  };
+  // Ensure scenarios are defined
+  if (!config.scenarios || config.scenarios.length === 0) {
+    throw new Error(
+      'No scenarios defined in config. Please add scenarios to your config file.'
+    );
+  }
 
   return {
     config,
-    scenarios,
+    scenarios: config.scenarios,
     configPath,
   };
 };

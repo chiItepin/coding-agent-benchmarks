@@ -16,7 +16,7 @@ import { getGitRoot, isGitRepository } from './gitUtils';
  * @param explicitRoot Optional explicit workspace root from config
  * @returns Absolute path to workspace root
  */
-export function resolveWorkspaceRoot(explicitRoot?: string): string {
+export const resolveWorkspaceRoot = (explicitRoot?: string): string => {
   // 1. Use explicit root if provided
   if (explicitRoot) {
     const resolved = path.resolve(explicitRoot);
@@ -38,7 +38,7 @@ export function resolveWorkspaceRoot(explicitRoot?: string): string {
 
   // 3. Fall back to current working directory
   return process.cwd();
-}
+};
 
 /**
  * Resolve file paths relative to workspace root
@@ -66,10 +66,10 @@ export const resolveFilePaths = (
  * @param contextFiles Array of context file paths (relative or absolute)
  * @returns Array of file contents with metadata
  */
-export function readContextFiles(
+export const readContextFiles = (
   workspaceRoot: string,
   contextFiles: readonly string[]
-): Array<{ path: string; content: string }> {
+): Array<{ path: string; content: string }> => {
   const absolutePaths = resolveFilePaths(workspaceRoot, contextFiles);
   const results: Array<{ path: string; content: string }> = [];
 
@@ -91,4 +91,4 @@ export function readContextFiles(
   }
 
   return results;
-}
+};
