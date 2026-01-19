@@ -6,3 +6,11 @@ examples/
 node_modules/
 .benchmarks/
 *.log
+benchmarks.config.example.js
+.gitignore
+.npmignore
+
+# Include these files
+!README.md
+!LICENSE
+!dist/
