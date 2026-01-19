@@ -185,22 +185,22 @@ try {
 
 ### Async/Await
 ```typescript
-async function operation(): Promise<Result> {
+const operation = async (): Promise<Result> => {
   // Always use async/await, not callbacks
-}
+};
 ```
 
 ### Type Safety
 ```typescript
 // Good: Explicit types
-function validate(files: readonly string[]): ValidationResult {
+const validate = (files: readonly string[]): ValidationResult => {
   // ...
-}
+};
 
 // Avoid: Implicit any
-function process(data) { // ❌ No type
+const process = (data) => { // ❌ No type
   // ...
-}
+};
 ```
 
 ## Documentation
