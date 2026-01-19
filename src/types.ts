@@ -90,6 +90,21 @@ export interface ESLintValidation {
 }
 
 /**
+ * Custom validator configuration
+ */
+export interface CustomValidatorConfig {
+  /**
+   * Enable this custom validator
+   */
+  enabled: boolean;
+
+  /**
+   * Custom configuration options for the validator
+   */
+  options?: Record<string, any>;
+}
+
+/**
  * Validation strategy combining multiple validation methods
  */
 export interface ValidationStrategy {
@@ -107,6 +122,12 @@ export interface ValidationStrategy {
    * ESLint validation
    */
   eslint?: ESLintValidation;
+
+  /**
+   * Custom validators configuration
+   * Key is the custom validator type name
+   */
+  custom?: Record<string, CustomValidatorConfig>;
 }
 
 /**
@@ -175,7 +196,7 @@ export interface Violation {
   /**
    * Type of validation that found this violation
    */
-  type: 'pattern' | 'llm-judge' | 'eslint';
+  type: string;
 
   /**
    * Description of the violation
@@ -226,7 +247,7 @@ export interface ValidationResult {
   /**
    * Type of validator that produced this result
    */
-  validatorType: 'pattern' | 'llm-judge' | 'eslint';
+  validatorType: string;
 
   /**
    * Error message if the validator itself failed
@@ -370,7 +391,7 @@ export interface CodeValidator {
   /**
    * Type identifier for this validator
    */
-  type: 'pattern' | 'llm-judge' | 'eslint';
+  type: string;
 
   /**
    * Validate generated code

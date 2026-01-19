@@ -6,7 +6,7 @@ Open-source framework for evaluating AI coding assistants (like GitHub Copilot C
 ## Features
 
 - **Multiple Adapters**: Built-in support for GitHub Copilot CLI and Claude Code CLI
-- **Flexible Validation**: Pattern-based validation, LLM-as-judge semantic evaluation, and ESLint integration
+- **Flexible Validation**: Pattern-based validation, LLM-as-judge semantic evaluation, ESLint integration, and custom validators
 - **Baseline Tracking**: Save and compare evaluation results over time
 - **Extensible**: Easy to add custom scenarios, validators, and adapters
 - **CLI & Programmatic API**: Use as a command-line tool or integrate into your workflow
@@ -228,6 +228,30 @@ validationStrategy: {
 }
 ```
 
+### Custom Validators
+
+You can add your own validators for domain-specific checks like build scripts, additional linters (stylelint, prettier), or custom quality checks:
+
+```javascript
+validationStrategy: {
+  // ... other validators
+  custom: {
+    'build-script': {
+      enabled: true,
+      options: {
+        command: 'npm run build',
+        cwd: process.cwd(),
+      },
+    },
+    'stylelint': {
+      enabled: true,
+    },
+  },
+}
+```
+
+See the [Creating Custom Validators](#creating-custom-validators) section for implementation details.
+
 ## Scoring
 
 Each scenario receives a score from 0.0 to 1.0:
@@ -334,28 +358,214 @@ runEvaluation();
 
 ## Creating Custom Validators
 
-Implement the `CodeValidator` interface:
+You can extend the validation system by implementing custom validators for domain-specific checks like running build scripts, checking for specific patterns, or integrating other linters.
+
+### Step 1: Implement the `CodeValidator` Interface
 
 ```typescript
 import { CodeValidator, ValidationResult, TestScenario } from 'coding-agent-benchmarks';
+import { execSync } from 'child_process';
+import * as path from 'path';
 
-export class CustomValidator implements CodeValidator {
-  public readonly type = 'custom';
+export class BuildScriptValidator implements CodeValidator {
+  public readonly type = 'build-script';
 
   async validate(
     files: readonly string[],
     scenario: TestScenario
   ): Promise<ValidationResult> {
-    // Your validation logic here
-    return {
-      passed: true,
-      score: 1.0,
-      violations: [],
-      validatorType: 'custom',
-    };
+    try {
+      // Get custom options from the scenario's validation strategy
+      const options = scenario.validationStrategy.custom?.[this.type]?.options;
+      const buildCommand = options?.command || 'npm run build';
+      const workingDir = options?.cwd || process.cwd();
+
+      // Run the build script
+      execSync(buildCommand, {
+        cwd: workingDir,
+        stdio: 'pipe',
+        encoding: 'utf-8',
+      });
+
+      return {
+        passed: true,
+        score: 1.0,
+        violations: [],
+        validatorType: this.type,
+      };
+    } catch (error: any) {
+      return {
+        passed: false,
+        score: 0,
+        violations: [
+          {
+            type: this.type,
+            message: 'Build script failed',
+            severity: 'critical',
+            details: error.message,
+          },
+        ],
+        validatorType: this.type,
+      };
+    }
   }
 }
 ```
+
+### Step 2: Register Custom Validators with the Evaluator
+
+When using the programmatic API, pass your custom validators to the `Evaluator`:
+
+```typescript
+import { Evaluator, loadConfig } from 'coding-agent-benchmarks';
+import { BuildScriptValidator } from './validators/buildScript';
+
+async function runEvaluation() {
+  const { scenarios } = await loadConfig();
+
+  const evaluator = new Evaluator({
+    adapter: 'copilot',
+    model: 'openai/gpt-4.1',
+    verbose: true,
+    customValidators: [
+      new BuildScriptValidator(),
+      // Add more custom validators here
+    ],
+  });
+
+  const report = await evaluator.evaluate(scenarios);
+  console.log(`Average score: ${report.summary.averageScore.toFixed(2)}`);
+}
+```
+
+### Step 3: Enable Custom Validators in Scenarios
+
+Configure which scenarios should use your custom validators:
+
+```javascript
+// In benchmarks.config.js
+module.exports = {
+  scenarios: [
+    {
+      id: 'react-component-builds',
+      category: 'react',
+      severity: 'critical',
+      tags: ['react', 'build'],
+      description: 'Ensure generated React components compile successfully',
+      prompt: 'Create a React component called UserProfile...',
+      validationStrategy: {
+        patterns: {
+          requiredPatterns: [/export\s+(default\s+)?function\s+UserProfile/],
+        },
+        // Enable your custom validator
+        custom: {
+          'build-script': {
+            enabled: true,
+            options: {
+              command: 'npm run build',
+              cwd: process.cwd(),
+            },
+          },
+        },
+      },
+    },
+  ],
+};
+```
+
+### Example: Custom Stylelint Validator
+
+```typescript
+import { CodeValidator, ValidationResult, TestScenario } from 'coding-agent-benchmarks';
+import { execSync } from 'child_process';
+import * as fs from 'fs';
+
+export class StylelintValidator implements CodeValidator {
+  public readonly type = 'stylelint';
+
+  async validate(
+    files: readonly string[],
+    scenario: TestScenario
+  ): Promise<ValidationResult> {
+    const violations = [];
+    
+    // Filter for CSS/SCSS files
+    const styleFiles = files.filter(f => /\.(css|scss|sass)$/.test(f));
+    
+    if (styleFiles.length === 0) {
+      return {
+        passed: true,
+        score: -1, // Skipped
+        violations: [],
+        validatorType: this.type,
+      };
+    }
+
+    try {
+      for (const file of styleFiles) {
+        const output = execSync(`npx stylelint "${file}" --formatter json`, {
+          encoding: 'utf-8',
+          stdio: 'pipe',
+        });
+
+        const results = JSON.parse(output);
+        for (const result of results) {
+          for (const warning of result.warnings || []) {
+            violations.push({
+              type: this.type,
+              message: `${warning.rule}: ${warning.text}`,
+              file: file,
+              line: warning.line,
+              severity: warning.severity === 'error' ? 'major' : 'minor',
+            });
+          }
+        }
+      }
+
+      return {
+        passed: violations.length === 0,
+        score: violations.length === 0 ? 1.0 : 0.5,
+        violations,
+        validatorType: this.type,
+      };
+    } catch (error) {
+      return {
+        passed: false,
+        score: 0,
+        violations: [],
+        validatorType: this.type,
+        error: `Stylelint validation failed: ${error}`,
+      };
+    }
+  }
+}
+```
+
+Then use it in your evaluation:
+
+```typescript
+const evaluator = new Evaluator({
+  adapter: 'copilot',
+  customValidators: [new StylelintValidator()],
+});
+```
+
+And enable it in your scenarios:
+
+```javascript
+{
+  id: 'css-best-practices',
+  prompt: 'Create a CSS file with button styles...',
+  validationStrategy: {
+    custom: {
+      'stylelint': {
+        enabled: true,
+      },
+    },
+  },
+}
+```
+
 
 ## Creating Custom Adapters
 

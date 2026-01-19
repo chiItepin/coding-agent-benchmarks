@@ -5,6 +5,7 @@
 import {
   AdapterType,
   CodeGenerationAdapter,
+  CodeValidator,
   TestScenario,
   EvaluationResult,
   EvaluationReport,
@@ -26,6 +27,11 @@ export interface EvaluatorOptions {
   verbose?: boolean;
   saveBaseline?: boolean;
   compareBaseline?: boolean;
+  /**
+   * Custom validators to run alongside built-in validators
+   * Validators will be instantiated once and reused across all scenarios
+   */
+  customValidators?: CodeValidator[];
 }
 
 export class Evaluator {
@@ -33,11 +39,13 @@ export class Evaluator {
   private workspaceRoot: string;
   private baselineManager: BaselineManager;
   private options: EvaluatorOptions;
+  private customValidators: CodeValidator[];
 
   constructor(options: EvaluatorOptions) {
     this.options = options;
     this.workspaceRoot = resolveWorkspaceRoot(options.workspaceRoot);
     this.baselineManager = new BaselineManager(this.workspaceRoot);
+    this.customValidators = options.customValidators || [];
 
     // Create adapter based on type
     this.adapter = this.createAdapter(options.adapter);
@@ -171,6 +179,20 @@ export class Evaluator {
 
       if (this.options.verbose && eslintResult.score >= 0) {
         console.log(`  ESLint: ${eslintResult.score.toFixed(2)}`);
+      }
+
+      // Run custom validators
+      for (const validator of this.customValidators) {
+        // Check if this validator should run for this scenario
+        const customConfig = scenario.validationStrategy.custom?.[validator.type];
+        if (customConfig?.enabled) {
+          const customResult = await validator.validate(generatedFiles, scenario);
+          validationResults.push(customResult);
+
+          if (this.options.verbose && customResult.score >= 0) {
+            console.log(`  ${validator.type}: ${customResult.score.toFixed(2)}`);
+          }
+        }
       }
 
       // Calculate overall score (average of non-skipped validators)
