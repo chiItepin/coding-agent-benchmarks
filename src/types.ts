@@ -3,6 +3,16 @@
  */
 
 /**
+ * User entity with metadata
+ */
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  metadata: Record<string, unknown>;
+}
+
+/**
  * Generic categories for test scenarios
  */
 export type TestCategory = 'typescript' | 'react' | 'testing' | 'architecture' | 'performance' | 'general';

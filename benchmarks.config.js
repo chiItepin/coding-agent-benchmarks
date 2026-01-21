@@ -26,7 +26,7 @@ module.exports = {
       validationStrategy: {
         patterns: {
           forbiddenPatterns: [/:\s*any\b/],
-          requiredPatterns: [/interface\s+User/],
+          requiredPatterns: [/interface\s+User\b/],
         },
       },
       timeout: 120000,

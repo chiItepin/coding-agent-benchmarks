@@ -60,6 +60,35 @@ export const getChangedFiles = (workspaceRoot: string): string[] => {
 };
 
 /**
+ * Get files that changed between two git status snapshots
+ * @param before Git status output before operation
+ * @param after Git status output after operation
+ * @returns Array of file paths that were added or modified
+ */
+export const getChangedFilesDiff = (before: string, after: string): string[] => {
+  const beforeLines = new Set(before.split('\n').filter(Boolean));
+  const afterLines = after.split('\n').filter(Boolean);
+
+  const newOrModified: string[] = [];
+
+  for (const line of afterLines) {
+    if (!beforeLines.has(line)) {
+      // Extract file path (e.g. "?? src/file.tsx" becomes "src/file.tsx")
+      const match = /^.{3}(.+)$/.exec(line);
+      if (match) {
+        const filePath = match[1];
+        // Skip directories (end with /)
+        if (!filePath.endsWith('/')) {
+          newOrModified.push(filePath);
+        }
+      }
+    }
+  }
+
+  return newOrModified;
+};
+
+/**
  * Get the git root directory
  * @returns Absolute path to git root
  */

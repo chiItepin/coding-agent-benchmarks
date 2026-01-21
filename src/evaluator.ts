@@ -49,9 +49,15 @@ export class Evaluator {
   private createAdapter(type: AdapterType): CodeGenerationAdapter {
     switch (type) {
       case 'copilot':
-        return new CopilotCLIAdapter(this.workspaceRoot);
+        return new CopilotCLIAdapter({
+          workspaceRoot: this.workspaceRoot,
+          model: this.options.model,
+        });
       case 'claude-code':
-        return new ClaudeCodeCLIAdapter(this.workspaceRoot);
+        return new ClaudeCodeCLIAdapter({
+          workspaceRoot: this.workspaceRoot,
+          model: this.options.model,
+        });
       default:
         throw new Error(`Unknown adapter type: ${type}`);
     }

@@ -2,17 +2,31 @@
  * GitHub Copilot CLI Adapter
  */
 
-import { spawn } from 'child_process';
-import { CodeGenerationAdapter } from '../types';
-import { getChangedFiles } from '../utils/gitUtils';
-import { readContextFiles, resolveWorkspaceRoot } from '../utils/workspaceUtils';
+import { spawn } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
+import { CodeGenerationAdapter } from "../types";
+import { getChangedFilesDiff, getGitStatusPorcelain } from "../utils/gitUtils";
+import {
+  readContextFiles,
+  resolveWorkspaceRoot,
+} from "../utils/workspaceUtils";
+
+export interface CopilotCLIAdapterOptions {
+  workspaceRoot?: string;
+  model?: string;
+}
+
+const DEFAULT_MODEL = "claude-sonnet-4.5";
 
 export class CopilotCLIAdapter implements CodeGenerationAdapter {
-  public readonly type = 'copilot' as const;
+  public readonly type = "copilot" as const;
   private workspaceRoot: string;
+  private model: string;
 
-  constructor(workspaceRoot?: string) {
-    this.workspaceRoot = resolveWorkspaceRoot(workspaceRoot);
+  constructor(options?: CopilotCLIAdapterOptions) {
+    this.workspaceRoot = resolveWorkspaceRoot(options?.workspaceRoot);
+    this.model = options?.model || DEFAULT_MODEL;
   }
 
   /**
@@ -20,18 +34,51 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
    */
   async checkAvailability(): Promise<boolean> {
     return new Promise((resolve) => {
-      const proc = spawn('which', ['copilot'], {
-        stdio: 'pipe',
+      const proc = spawn("which", ["copilot"], {
+        stdio: "pipe",
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         resolve(code === 0);
       });
 
-      proc.on('error', () => {
+      proc.on("error", () => {
         resolve(false);
       });
     });
+  }
+
+  /**
+   * Build the full prompt with context files
+   */
+  private buildPrompt(
+    prompt: string,
+    contextFiles?: readonly string[]
+  ): string {
+    const parts: string[] = [];
+
+    if (contextFiles && contextFiles.length > 0) {
+      const contexts = readContextFiles(this.workspaceRoot, contextFiles);
+      if (contexts.length > 0) {
+        parts.push("# Reference Files\n");
+        const contextContent = contexts
+          .map((ctx) => {
+            const ext = path.extname(ctx.path).slice(1) || "typescript";
+            return `### ${ctx.path}\n\`\`\`${ext}\n${ctx.content}\n\`\`\``;
+          })
+          .join("\n\n");
+        parts.push(contextContent);
+        parts.push("\n---\n");
+      }
+    }
+
+    parts.push("# Task\n");
+    parts.push(prompt);
+    parts.push(
+      "\n\nCreate/update the necessary file(s). Do not output code to the terminal - write it to files instead."
+    );
+
+    return parts.join("\n");
   }
 
   /**
@@ -43,35 +90,30 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
     contextFiles?: readonly string[],
     timeout?: number | null
   ): Promise<string[]> {
-    // Build the full prompt with context
-    let fullPrompt = prompt;
+    const fullPrompt = this.buildPrompt(prompt, contextFiles);
 
-    if (contextFiles && contextFiles.length > 0) {
-      const contexts = readContextFiles(this.workspaceRoot, contextFiles);
-      if (contexts.length > 0) {
-        const contextSection = contexts
-          .map(ctx => `\n\n### Context from ${ctx.path}:\n\`\`\`\n${ctx.content}\n\`\`\``)
-          .join('\n');
-        fullPrompt = `${prompt}${contextSection}`;
-      }
-    }
+    // Capture git status before generation
+    const statusBefore = getGitStatusPorcelain(this.workspaceRoot);
 
-    // Spawn the copilot CLI process
-    // Note: We don't use shell:true to avoid shell escaping issues with special characters
+    // Write prompt to temp file and pipe via stdin (matches @copilot-evals pattern)
     return new Promise((resolve, reject) => {
-      const proc = spawn('copilot', ['-p', fullPrompt], {
+      const tempFile = path.join(this.workspaceRoot, '.copilot-eval-prompt.txt');
+      fs.writeFileSync(tempFile, fullPrompt, "utf8");
+
+      const command = `cat "${tempFile}" | copilot --model ${this.model} --allow-all-tools --deny-tool 'shell(rm)' --deny-tool 'shell(git push)' --deny-tool 'shell(git commit)'`;
+      const proc = spawn("sh", ["-c", command], {
         cwd: this.workspaceRoot,
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: ["pipe", "pipe", "pipe"],
       });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      proc.stdout?.on('data', (data) => {
+      proc.stdout?.on("data", (data) => {
         stdout += data.toString();
       });
 
-      proc.stderr?.on('data', (data) => {
+      proc.stderr?.on("data", (data) => {
         stderr += data.toString();
       });
 
@@ -79,33 +121,51 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
       let timeoutHandle: NodeJS.Timeout | null = null;
       if (timeout !== null && timeout !== undefined) {
         timeoutHandle = setTimeout(() => {
-          proc.kill('SIGTERM');
+          proc.kill("SIGTERM");
           reject(new Error(`Copilot CLI timed out after ${timeout}ms`));
         }, timeout);
       }
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         if (timeoutHandle) {
           clearTimeout(timeoutHandle);
         }
 
+        // Clean up temp file
+        try {
+          fs.unlinkSync(tempFile);
+        } catch {
+          // Ignore cleanup errors
+        }
+
         if (code !== 0) {
-          reject(new Error(`Copilot CLI exited with code ${code}\nStderr: ${stderr}`));
+          reject(
+            new Error(
+              `Copilot CLI exited with code ${code}\nStderr: ${stderr}`,
+            ),
+          );
           return;
         }
 
-        // Get the list of changed files
+        // Get files changed during generation (diff before/after)
         try {
-          const changedFiles = getChangedFiles(this.workspaceRoot);
+          const statusAfter = getGitStatusPorcelain(this.workspaceRoot);
+          const changedFiles = getChangedFilesDiff(statusBefore, statusAfter);
           resolve(changedFiles);
         } catch (error) {
           reject(new Error(`Failed to get changed files: ${error}`));
         }
       });
 
-      proc.on('error', (error) => {
+      proc.on("error", (error) => {
         if (timeoutHandle) {
           clearTimeout(timeoutHandle);
+        }
+        // Clean up temp file
+        try {
+          fs.unlinkSync(tempFile);
+        } catch {
+          // Ignore cleanup errors
         }
         reject(new Error(`Failed to spawn Copilot CLI: ${error}`));
       });
