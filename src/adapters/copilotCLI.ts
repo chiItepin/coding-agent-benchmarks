@@ -4,7 +4,7 @@
 
 import { spawn } from 'child_process';
 import { CodeGenerationAdapter } from '../types';
-import { getChangedFiles, resetGitWorkingDirectory } from '../utils/gitUtils';
+import { getChangedFiles } from '../utils/gitUtils';
 import { readContextFiles, resolveWorkspaceRoot } from '../utils/workspaceUtils';
 
 export class CopilotCLIAdapter implements CodeGenerationAdapter {
@@ -43,13 +43,6 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
     contextFiles?: readonly string[],
     timeout?: number | null
   ): Promise<string[]> {
-    // Reset workspace to clean state before generation
-    try {
-      resetGitWorkingDirectory(this.workspaceRoot);
-    } catch (error) {
-      console.warn('Warning: Could not reset git working directory:', error);
-    }
-
     // Build the full prompt with context
     let fullPrompt = prompt;
 
@@ -64,11 +57,11 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
     }
 
     // Spawn the copilot CLI process
+    // Note: We don't use shell:true to avoid shell escaping issues with special characters
     return new Promise((resolve, reject) => {
-      const proc = spawn('copilot', [fullPrompt], {
+      const proc = spawn('copilot', ['-p', fullPrompt], {
         cwd: this.workspaceRoot,
         stdio: ['pipe', 'pipe', 'pipe'],
-        shell: true,
       });
 
       let stdout = '';

@@ -267,7 +267,16 @@ export class Evaluator {
       } else {
         console.log(`  ✗ FAILED (score: ${result.score.toFixed(2)})`);
         if (result.violations.length > 0) {
-          console.log(`    ${result.violations.length} violation(s)`);
+          console.log(`    ${result.violations.length} violation(s):\n`);
+          result.violations.forEach((v, idx) => {
+            console.log(`    ${idx + 1}. [${v.type}] ${v.message}`);
+            if (v.file) {
+              console.log(`       File: ${v.file}${v.line ? `:${v.line}` : ''}`);
+            }
+            if (v.details) {
+              console.log(`       Details: ${v.details}`);
+            }
+          });
         }
         if (result.error) {
           console.log(`    Error: ${result.error}`);

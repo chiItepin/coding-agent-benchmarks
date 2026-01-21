@@ -92,25 +92,4 @@ export const isGitRepository = (directory: string): boolean => {
   }
 };
 
-/**
- * Reset git working directory to clean state (discard all changes)
- * WARNING: This will discard all uncommitted changes
- * @param workspaceRoot The workspace root directory
- */
-export const resetGitWorkingDirectory = (workspaceRoot: string): void => {
-  try {
-    // Reset all tracked files
-    execSync('git reset --hard HEAD', {
-      cwd: workspaceRoot,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
 
-    // Remove all untracked files and directories
-    execSync('git clean -fd', {
-      cwd: workspaceRoot,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-  } catch (error) {
-    throw new Error(`Failed to reset git working directory: ${error}`);
-  }
-};
