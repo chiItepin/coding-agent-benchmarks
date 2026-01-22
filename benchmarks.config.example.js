@@ -20,6 +20,7 @@ module.exports = {
 
   // Enable automatic baseline saving for all evaluations (optional)
   // When enabled, results are saved to .benchmarks/baselines/{adapter}/{model}/{scenario-id}.json
+  // Model defaults: copilot uses "claude-sonnet-4.5", claude-code uses "sonnet"
   // saveBaseline: false,
 
   // Enable automatic baseline comparison for all evaluations (optional)

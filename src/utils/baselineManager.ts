@@ -39,7 +39,7 @@ export class BaselineManager {
   saveBaseline(
     result: EvaluationResult,
     adapter: AdapterType,
-    model: string = 'default'
+    model: string
   ): void {
     const baseline: BaselineData = {
       scenarioId: result.scenario.id,
@@ -91,7 +91,7 @@ export class BaselineManager {
   compareWithBaseline(
     result: EvaluationResult,
     adapter: AdapterType,
-    model: string = 'default'
+    model: string
   ): {
     baselineScore: number;
     delta: number;

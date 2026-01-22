@@ -253,7 +253,7 @@ export class Evaluator extends EventEmitter {
         const comparison = this.baselineManager.compareWithBaseline(
           result,
           this.options.adapter,
-          this.options.model || "default",
+          this.adapter.getModel(),
         );
         if (comparison) {
           result.baselineComparison = comparison;
@@ -265,7 +265,7 @@ export class Evaluator extends EventEmitter {
         this.baselineManager.saveBaseline(
           result,
           this.options.adapter,
-          this.options.model || "default",
+          this.adapter.getModel(),
         );
       }
 

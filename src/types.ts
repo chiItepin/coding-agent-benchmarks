@@ -360,6 +360,11 @@ export interface CodeGenerationAdapter {
   checkAvailability(): Promise<boolean>;
 
   /**
+   * Get the model being used by this adapter
+   */
+  getModel(): string;
+
+  /**
    * Generate code based on a prompt
    * @param prompt The instruction/prompt for the coding agent
    * @param contextFiles Optional context files to provide

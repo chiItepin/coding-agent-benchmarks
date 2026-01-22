@@ -258,6 +258,11 @@ module.exports = {
 
 Baselines are stored in `.benchmarks/baselines/{adapter}/{model}/{scenario-id}.json`
 
+The `{model}` folder name depends on the adapter:
+- **Copilot adapter**: `claude-sonnet-4.5` (default)
+- **Claude Code adapter**: `sonnet` (default)
+- Custom model names if specified via `--model` option
+
 When `compareBaseline` is enabled, the report will show score deltas and whether results improved or regressed.
 
 **Tip**: Add `.benchmarks/` to your `.gitignore` to keep baseline data local to each developer.

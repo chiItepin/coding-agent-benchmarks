@@ -49,6 +49,13 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
   }
 
   /**
+   * Get the model being used
+   */
+  getModel(): string {
+    return this.model;
+  }
+
+  /**
    * Build the full prompt with context files
    */
   private buildPrompt(
