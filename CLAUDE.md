@@ -15,10 +15,28 @@ src/
 ├── config/            # Configuration loading
 ├── utils/             # Utility functions (git, workspace, baseline)
 ├── types.ts           # TypeScript type definitions
-├── evaluator.ts       # Main evaluation engine
+├── evaluator.ts       # Main evaluation engine (extends EventEmitter)
+├── reporter.ts        # Live progress UI with TTY detection
 ├── runner.ts          # CLI interface
 └── index.ts           # Public API exports
 ```
+
+## Architecture Notes
+
+### Event-Driven Evaluation
+The `Evaluator` class extends `EventEmitter` and emits lifecycle events:
+- `evaluation:start` - When batch evaluation begins
+- `scenario:start` - When a scenario begins
+- `scenario:generating` - When code generation starts
+- `scenario:validating` - When validation starts
+- `scenario:complete` - When a scenario finishes (with result)
+- `log` - For verbose output messages
+
+### Progress Reporter
+`ProgressReporter` provides Jest-style live terminal output:
+- **TTY mode**: Animated spinner, live status updates via `log-update`
+- **Non-TTY mode**: Simple line-by-line logging (CI-friendly)
+- Status indicators: `✓ PASS`, `✗ FAIL`, `○ SKIP`
 
 ## Coding Standards
 
@@ -30,11 +48,20 @@ src/
 - **Module system**: CommonJS (`module: "commonjs"`)
 
 ### Code Style
-- **Use JSDoc comments** for public APIs and exported functions
 - **Keep functions focused** - Single responsibility principle
 - **Avoid external dependencies** unless absolutely necessary
 - **Use readonly** for arrays/objects that shouldn't be mutated
 - **Use const assertions** for literal types (e.g., `as const`)
+- **Prefer forEach over for loops** when iterating for side effects (printing, mutating)
+  - Use `array.forEach(item => ...)` instead of `for (const item of array)`
+  - Exception: Use for-of when building new arrays or early returns needed
+
+### Comments
+- **Avoid redundant comments** - Don't restate what the code already makes clear
+- **Explain "why" not "what"** - Comments should add context, not narrate the code
+- **Remove unnecessary JSDoc** - Only document public APIs with non-obvious behavior
+- **Good comment**: `// TTY detection: process.stdout.isTTY is undefined when piped`
+- **Bad comment**: `// Initialize state for each scenario` (loop already shows this)
 
 ### File Organization
 - **One class/interface per file** when possible

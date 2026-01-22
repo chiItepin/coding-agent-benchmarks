@@ -1,7 +1,7 @@
 {
   "name": "coding-agent-benchmarks",
   "version": "0.1.3",
-  "description": "Open-source framework for evaluating coding agents (GitHub Copilot CLI, Claude Code, etc.) against coding standards and best practices",
+  "description": "Testing coding agents (GitHub Copilot CLI, Claude Code, etc.) with your repo's context to evaluate their code generation quality.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -18,10 +18,24 @@
     "benchmark",
     "evaluation",
     "copilot",
+    "github-copilot",
+    "claude",
     "claude-code",
     "ai",
+    "llm",
+    "openai",
+    "gpt",
     "testing",
-    "code-quality"
+    "code-quality",
+    "code-generation",
+    "code-standards",
+    "lint",
+    "eslint",
+    "ci-cd",
+    "automation",
+    "developer-tools",
+    "prompt-testing",
+    "ai-testing"
   ],
   "author": "chiItepin",
   "license": "MIT",
@@ -38,12 +52,15 @@
     "LICENSE"
   ],
   "dependencies": {
-    "commander": "^13.1.0"
+    "chalk": "^4.1.2",
+    "commander": "^13.1.0",
+    "log-update": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.0.9",
     "eslint": "^9.39.2",
     "prettier": "^3.8.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

@@ -298,6 +298,43 @@ Test LLM judge with a custom prompt (for debugging).
 **Options:**
 - `--model <model>`: LLM model to use
 
+## Understanding Output
+
+When running evaluations, each scenario displays a live status that updates as it progresses:
+
+```
+Evaluating 3 scenario(s)...
+
+✓ [1/3] typescript-no-any PASS (score: 1.00) 14.8s
+✗ [2/3] react-inline-styles FAIL (score: 0.60) 22.1s
+○ [3/3] async-error-handling SKIP (error) 2m 5s
+
+============================================================
+EVALUATION SUMMARY
+============================================================
+Total scenarios: 3
+Passed: 1
+Failed: 1
+Skipped: 1
+...
+```
+
+### Status Indicators
+
+| Status | Symbol | Meaning |
+|--------|--------|---------|
+| **PASS** | ✓ | Scenario passed validation (score ≥ 0.8, no violations) |
+| **FAIL** | ✗ | Scenario was evaluated but didn't pass (low score or violations) |
+| **SKIP** | ○ | Scenario couldn't be evaluated due to an error |
+
+### Common Causes for SKIP
+
+- **Timeout**: Code generation exceeded the configured timeout
+- **Adapter failure**: The CLI (Copilot or Claude Code) crashed or returned an error
+- **File system errors**: Couldn't read context files or write generated code
+
+> **Note**: In interactive terminals, you'll see a spinner animation (⠋) while scenarios are running. In CI/non-TTY environments, output falls back to simple line-by-line logging.
+
 ## Programmatic Usage
 
 You can also use the framework programmatically:
