@@ -428,6 +428,16 @@ export interface BenchmarkConfig {
   defaultTimeout?: number | null;
 
   /**
+   * Enable automatic baseline saving for all evaluations
+   */
+  saveBaseline?: boolean;
+
+  /**
+   * Enable automatic baseline comparison for all evaluations
+   */
+  compareBaseline?: boolean;
+
+  /**
    * Output directory for reports
    */
   outputDir?: string;

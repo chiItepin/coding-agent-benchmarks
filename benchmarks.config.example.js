@@ -18,6 +18,14 @@ module.exports = {
   // Workspace root (auto-detected if not specified)
   // workspaceRoot: process.cwd(),
 
+  // Enable automatic baseline saving for all evaluations (optional)
+  // When enabled, results are saved to .benchmarks/baselines/{adapter}/{model}/{scenario-id}.json
+  // saveBaseline: false,
+
+  // Enable automatic baseline comparison for all evaluations (optional)
+  // When enabled, results are compared with existing baselines and deltas are shown
+  // compareBaseline: false,
+
   // Custom test scenarios
   scenarios: [
     {

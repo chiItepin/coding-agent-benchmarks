@@ -12,8 +12,8 @@ module.exports = {
 
   // Workspace root (auto-detected if not specified)
   workspaceRoot: process.cwd(),
-
-  // Define your test scenarios
+  saveBaseline: true,
+  compareBaseline: false,
   scenarios: [
     {
       id: 'typescript-no-any',

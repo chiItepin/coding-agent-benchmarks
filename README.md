@@ -51,12 +51,6 @@ npx coding-agent-benchmarks evaluate --scenario typescript-no-any
 npx coding-agent-benchmarks evaluate --category typescript
 npx coding-agent-benchmarks evaluate --tag best-practices
 
-# Save as baseline for future comparison
-npx coding-agent-benchmarks evaluate --save-baseline
-
-# Compare with baseline
-npx coding-agent-benchmarks evaluate --compare-baseline
-
 # Export report as JSON
 npx coding-agent-benchmarks evaluate --output report.json
 ```
@@ -80,6 +74,12 @@ module.exports = {
 
   // Workspace root (auto-detected if not specified)
   workspaceRoot: process.cwd(),
+
+  // Enable automatic baseline saving (optional)
+  saveBaseline: false,
+
+  // Enable automatic baseline comparison (optional)
+  compareBaseline: false,
 
   // Define your test scenarios
   scenarios: [
@@ -244,21 +244,23 @@ Violations are weighted by severity:
 
 ## Baseline Tracking
 
-Save current results as a baseline:
+Track evaluation results over time by enabling baseline management in your config file:
 
-```bash
-npx coding-agent-benchmarks evaluate --save-baseline
+```javascript
+// benchmarks.config.js
+module.exports = {
+  saveBaseline: true,
+  compareBaseline: true,
+
+  scenarios: [/* ... */],
+};
 ```
 
 Baselines are stored in `.benchmarks/baselines/{adapter}/{model}/{scenario-id}.json`
 
-Compare future runs against the baseline:
+When `compareBaseline` is enabled, the report will show score deltas and whether results improved or regressed.
 
-```bash
-npx coding-agent-benchmarks evaluate --compare-baseline
-```
-
-The report will show score deltas and whether results improved or regressed.
+**Tip**: Add `.benchmarks/` to your `.gitignore` to keep baseline data local to each developer.
 
 ## CLI Commands
 
@@ -275,8 +277,6 @@ Run benchmark evaluations.
 - `--threshold <number>`: Minimum passing score (default: `0.8`)
 - `--verbose`: Show detailed output
 - `--output <file>`: Export JSON report
-- `--save-baseline`: Save results as baseline
-- `--compare-baseline`: Compare with baseline
 - `--workspace-root <path>`: Workspace root directory
 
 ### `list`
@@ -343,14 +343,15 @@ You can also use the framework programmatically:
 import { Evaluator, loadConfig } from 'coding-agent-benchmarks';
 
 async function runEvaluation() {
-  // Load configuration
-  const { scenarios } = await loadConfig();
+  const { config, scenarios } = await loadConfig();
 
   // Create evaluator
   const evaluator = new Evaluator({
     adapter: 'copilot',
     model: 'openai/gpt-4.1',
     verbose: true,
+    saveBaseline: config.saveBaseline,
+    compareBaseline: config.compareBaseline,
   });
 
   // Check adapter availability

@@ -1,0 +1,8 @@
+{
+  "scenarioId": "typescript-no-any",
+  "score": 1,
+  "violations": [],
+  "timestamp": "2026-01-22T23:22:33.050Z",
+  "adapter": "copilot",
+  "model": "default"
+}

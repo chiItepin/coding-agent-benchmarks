@@ -7,67 +7,45 @@ argument-hint: [patch|minor] (optional)
 
 # Release Workflow
 
-Bump the package version, publish to npm, create a conventional commit based on git changes, and push.
+Analyze git changes, generate a conventional commit message, bump version, publish to npm, commit, and push.
 
-## Arguments
+## Usage
 
-Optional:
-- **version type**: `patch` or `minor` (default: `patch`)
-
-Example: `/release` or `/release minor`
+`/release` or `/release minor`
 
 ## Steps
 
-1. **Analyze git context**:
-   - Run `git diff --stat HEAD` to see uncommitted changes
-   - Run `git log --oneline -5` to see recent commit history
-   - Examine what files changed and the nature of changes
+1. **Analyze changes**: Run `git diff --stat` to see what changed
 
-2. **Generate commit message**:
-   Based on the git context, determine:
-   - **type**: `fix`, `feat`, or `refactor` based on the nature of changes
-   - **topic**: Infer from changed files/directories (e.g., `deps`, `cli`, `core`, `docs`)
-   - **message**: Summarize what changed in a concise description
+2. **Generate conventional commit message** in the format:
+   ```
+   <type>(<scope>): <description>
+   ```
 
-   Format: `<type>(<topic>): <message>`
+   Where:
+   - **type**: `fix`, `feat`, or `refactor` (based on changes)
+   - **scope**: Topic from changed files (e.g., `deps`, `cli`, `core`, `docs`)
+   - **description**: Concise summary (lowercase, no period, imperative mood)
+
+   Example: `feat(cli): add new benchmark command`
 
 3. **Determine version bump**:
-   - Use `$ARGUMENTS` if provided (`patch` or `minor`)
-   - Otherwise: `feat` → minor, `fix`/`refactor` → patch
+   - If `$ARGUMENTS` is `minor` → minor bump
+   - Otherwise: `feat` → minor, all others → patch
 
-4. **Show plan**: Display the proposed commit message and version bump to the user for confirmation
+4. **Execute release**:
+   - `npm version <patch|minor> --no-git-tag-version`
+   - `npm run build`
+   - `npm publish`
+   - `git add .`
+   - `git commit -m "<conventional-commit-message>"`
+   - `git push`
 
-5. **Bump version**: Run `npm version <patch|minor> --no-git-tag-version`
+## Conventional Commit Rules
 
-6. **Build**: Run `npm run build` to ensure the build succeeds
+- **Type**: `fix`, `feat`, or `refactor`
+- **Scope**: Short topic in parentheses (required)
+- **Description**: Lowercase, imperative mood, no period
+- **Format**: `type(scope): description`
 
-7. **Publish**: Run `npm publish`
-
-8. **Stage changes**: Run `git add .`
-
-9. **Commit**: Create commit with the generated conventional commit message
-
-10. **Create git tag**: Run `git tag v<new-version>`
-
-11. **Push**: Run `git push && git push --tags`
-
-## Commit Message Guidelines
-
-When analyzing git context:
-- **fix**: Bug fixes, security patches, dependency updates for vulnerabilities
-- **feat**: New features, new commands, new capabilities
-- **refactor**: Code restructuring, cleanup, performance improvements without behavior change
-
-Topic examples:
-- `deps` - dependency changes
-- `cli` - command-line interface changes
-- `core` - core functionality changes
-- `build` - build system changes
-- `docs` - documentation changes
-- `types` - TypeScript type changes
-
-## Error Handling
-
-- If any step fails, stop and report the error
-- Do not continue to publish if build fails
-- Do not commit/push if publish fails
+Stop if any command fails.

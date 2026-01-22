@@ -45,8 +45,6 @@ program
   .option("--threshold <number>", "Minimum passing score", "0.8")
   .option("--verbose", "Show detailed output")
   .option("--output <file>", "Export JSON report to file")
-  .option("--save-baseline", "Save results as baseline")
-  .option("--compare-baseline", "Compare results with baseline")
   .option("--workspace-root <path>", "Workspace root directory")
   .action(async (options) => {
     try {
@@ -60,8 +58,8 @@ program
         workspaceRoot: options.workspaceRoot,
         defaultTimeout: config.defaultTimeout,
         verbose: options.verbose,
-        saveBaseline: options.saveBaseline,
-        compareBaseline: options.compareBaseline,
+        saveBaseline: config.saveBaseline,
+        compareBaseline: config.compareBaseline,
       });
 
       const reporter = new ProgressReporter({ verbose: options.verbose });
