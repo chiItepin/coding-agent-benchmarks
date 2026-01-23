@@ -233,14 +233,15 @@ export class ProgressReporter {
     result: EvaluationResult,
     model: string,
   ): void {
-    if (result.passed) {
+    if (result.error) {
+      console.log(`  ○ SKIP (error)`);
+      this.printViolations(result.violations);
+      console.log(`    Error: ${result.error}`);
+    } else if (result.passed) {
       console.log(`  ✓ PASSED (score: ${result.score.toFixed(2)})`);
     } else {
       console.log(`  ✗ FAILED (score: ${result.score.toFixed(2)})`);
       this.printViolations(result.violations);
-      if (result.error) {
-        console.log(`    Error: ${result.error}`);
-      }
     }
 
     if (this.compareBaseline && result.baselineComparison) {
@@ -282,12 +283,9 @@ export class ProgressReporter {
 
     if (this.isInteractive) {
       report.results.forEach((result) => {
-        if (!result.passed) {
+        if (!result.passed && !result.error) {
           console.log(`\n${chalk.red("✗")} ${result.scenario.id}`);
           this.printViolations(result.violations);
-          if (result.error) {
-            console.log(`  Error: ${result.error}`);
-          }
         }
       });
     }
