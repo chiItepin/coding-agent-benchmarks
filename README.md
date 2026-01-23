@@ -3,6 +3,9 @@
 Open-source framework for evaluating AI coding assistants (like GitHub Copilot CLI or Claude Code) follow your coding standards. Here's the workflow:
 1. You give it a prompt → 2. AI generates code → 3. Library validates → 4. You get a score
 
+![WhatsApp Image 2026-01-23 at 9 04 49 AM](https://github.com/user-attachments/assets/3544d04f-37a5-47b0-a013-669c6015d26f)
+
+
 ## Features
 
 - **Multiple Adapters**: Built-in support for GitHub Copilot CLI and Claude Code CLI
