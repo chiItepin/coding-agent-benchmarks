@@ -27,7 +27,7 @@ export interface EvaluatorEvents {
   "scenario:start": (scenarioId: string, scenario: TestScenario) => void;
   "scenario:generating": (scenarioId: string) => void;
   "scenario:validating": (scenarioId: string) => void;
-  "scenario:complete": (scenarioId: string, result: EvaluationResult) => void;
+  "scenario:complete": (scenarioId: string, result: EvaluationResult, model: string) => void;
   "evaluation:complete": (report: EvaluationReport) => void;
   log: (message: string) => void;
 }
@@ -317,8 +317,8 @@ export class Evaluator extends EventEmitter {
       const result = await this.evaluateScenario(scenario);
       results.push(result);
 
-      // Emit scenario complete event
-      this.emit("scenario:complete", scenario.id, result);
+      // Emit scenario complete event with model
+      this.emit("scenario:complete", scenario.id, result, this.adapter.getModel());
     }
 
     // Calculate summary statistics

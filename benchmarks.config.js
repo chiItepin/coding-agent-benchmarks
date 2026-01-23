@@ -13,7 +13,7 @@ module.exports = {
   // Workspace root (auto-detected if not specified)
   workspaceRoot: process.cwd(),
   saveBaseline: true,
-  compareBaseline: false,
+  compareBaseline: true,
   scenarios: [
     {
       id: 'typescript-no-any',

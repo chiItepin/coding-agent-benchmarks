@@ -36,10 +36,21 @@ export class ProgressReporter {
   private spinnerInterval?: ReturnType<typeof setInterval>;
   private startTime: number = 0;
   private verboseBuffer: string[] = [];
+  private saveBaseline: boolean;
+  private compareBaseline: boolean;
+  private adapter: string;
 
-  constructor(options: { verbose?: boolean } = {}) {
+  constructor(options: {
+    verbose?: boolean;
+    saveBaseline?: boolean;
+    compareBaseline?: boolean;
+    adapter?: string;
+  } = {}) {
     this.isInteractive = process.stdout.isTTY === true;
     this.verbose = options.verbose ?? false;
+    this.saveBaseline = options.saveBaseline ?? false;
+    this.compareBaseline = options.compareBaseline ?? false;
+    this.adapter = options.adapter ?? 'unknown';
   }
 
   start(scenarios: TestScenario[]): void {
@@ -97,7 +108,7 @@ export class ProgressReporter {
     }
   }
 
-  onScenarioComplete(scenarioId: string, result: EvaluationResult): void {
+  onScenarioComplete(scenarioId: string, result: EvaluationResult, model: string): void {
     const state = this.scenarios.get(scenarioId);
     if (!state) return;
 
@@ -107,8 +118,15 @@ export class ProgressReporter {
 
     if (this.isInteractive) {
       this.render();
+
+      if (this.compareBaseline && result.baselineComparison) {
+        console.log(this.formatBaselineComparison(result.baselineComparison));
+      }
+      if (this.saveBaseline) {
+        console.log(this.formatBaselineSave(model));
+      }
     } else {
-      this.printScenarioResult(scenarioId, result);
+      this.printScenarioResult(scenarioId, result, model);
     }
 
     this.flushVerboseBuffer();
@@ -205,6 +223,7 @@ export class ProgressReporter {
   private printScenarioResult(
     scenarioId: string,
     result: EvaluationResult,
+    model: string,
   ): void {
     if (result.passed) {
       console.log(`  ✓ PASSED (score: ${result.score.toFixed(2)})`);
@@ -214,6 +233,13 @@ export class ProgressReporter {
       if (result.error) {
         console.log(`    Error: ${result.error}`);
       }
+    }
+
+    if (this.compareBaseline && result.baselineComparison) {
+      console.log(this.formatBaselineComparison(result.baselineComparison));
+    }
+    if (this.saveBaseline) {
+      console.log(this.formatBaselineSave(model));
     }
   }
 
@@ -283,5 +309,46 @@ export class ProgressReporter {
     const minutes = Math.floor(ms / 60000);
     const seconds = ((ms % 60000) / 1000).toFixed(0);
     return `${minutes}m ${seconds}s`;
+  }
+
+  private formatBaselineComparison(comparison: {
+    baselineScore: number;
+    delta: number;
+    isImprovement: boolean;
+  }): string {
+    if (comparison.baselineScore === 0) {
+      const sign = comparison.delta >= 0 ? '+' : '';
+      const arrow = comparison.delta >= 0
+        ? (this.isInteractive ? chalk.green('↑') : '↑')
+        : (this.isInteractive ? chalk.red('↓') : '↓');
+      const text = this.isInteractive
+        ? (comparison.delta >= 0
+          ? chalk.green(`${sign}${comparison.delta.toFixed(2)} from baseline (0.00)`)
+          : chalk.red(`${sign}${comparison.delta.toFixed(2)} from baseline (0.00)`))
+        : `${sign}${comparison.delta.toFixed(2)} from baseline (0.00)`;
+      return `    ${arrow} ${text}`;
+    }
+
+    const percentage = (comparison.delta / comparison.baselineScore) * 100;
+    const percentStr = Math.abs(percentage).toFixed(1);
+
+    if (comparison.isImprovement) {
+      const arrow = this.isInteractive ? chalk.green('↑') : '↑';
+      const text = this.isInteractive
+        ? chalk.green(`+${percentStr}% improvement from baseline`)
+        : `+${percentStr}% improvement from baseline`;
+      return `    ${arrow} ${text}`;
+    } else {
+      const arrow = this.isInteractive ? chalk.red('↓') : '↓';
+      const text = this.isInteractive
+        ? chalk.red(`-${percentStr}% regression from baseline`)
+        : `-${percentStr}% regression from baseline`;
+      return `    ${arrow} ${text}`;
+    }
+  }
+
+  private formatBaselineSave(model: string): string {
+    const path = `${this.adapter}/${model}`;
+    return `    → Baseline saved (${path})`;
   }
 }

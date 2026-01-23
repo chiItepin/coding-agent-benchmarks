@@ -62,7 +62,12 @@ program
         compareBaseline: config.compareBaseline,
       });
 
-      const reporter = new ProgressReporter({ verbose: options.verbose });
+      const reporter = new ProgressReporter({
+        verbose: options.verbose,
+        saveBaseline: config.saveBaseline,
+        compareBaseline: config.compareBaseline,
+        adapter: options.adapter,
+      });
 
       evaluator.on("evaluation:start", (scenarioList) => {
         reporter.start(scenarioList);
@@ -80,8 +85,8 @@ program
         reporter.onScenarioValidating(scenarioId);
       });
 
-      evaluator.on("scenario:complete", (scenarioId, result) => {
-        reporter.onScenarioComplete(scenarioId, result);
+      evaluator.on("scenario:complete", (scenarioId, result, model) => {
+        reporter.onScenarioComplete(scenarioId, result, model);
       });
 
       evaluator.on("log", (message) => {
