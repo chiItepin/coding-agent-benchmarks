@@ -4,12 +4,13 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { AdapterType, EvaluationResult, Violation } from '../types';
+import { AdapterType, EvaluationResult, Violation, ValidationResult } from '../types';
 
 export interface BaselineData {
   scenarioId: string;
   score: number;
   violations: Violation[];
+  validationResults: ValidationResult[];
   timestamp: string;
   adapter: AdapterType;
   model?: string;
@@ -45,6 +46,7 @@ export class BaselineManager {
       scenarioId: result.scenario.id,
       score: result.score,
       violations: result.violations,
+      validationResults: result.validationResults,
       timestamp: new Date().toISOString(),
       adapter,
       model,

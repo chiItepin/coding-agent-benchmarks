@@ -1,0 +1,8 @@
+{
+  "scenarioId": "typescript-strict-null-safety",
+  "score": 0.5,
+  "violations": [],
+  "timestamp": "2026-01-23T22:30:03.126Z",
+  "adapter": "copilot",
+  "model": "claude-sonnet-4.5"
+}

@@ -1,0 +1,15 @@
+{
+  "scenarioId": "typescript-explicit-return-types",
+  "score": 0.18393972058572117,
+  "violations": [
+    {
+      "type": "pattern",
+      "message": "Required pattern not found: async\\s+function\\s+\\w+\\([^)]*\\)\\s*:\\s*Promise<",
+      "file": "src/fetchUserData.ts",
+      "severity": "critical"
+    }
+  ],
+  "timestamp": "2026-01-23T22:30:22.931Z",
+  "adapter": "copilot",
+  "model": "claude-sonnet-4.5"
+}

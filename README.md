@@ -282,19 +282,124 @@ validationStrategy: {
 }
 ```
 
-## Scoring
+## Scoring System
 
-Each scenario receives a score from 0.0 to 1.0:
+The scoring system operates at three levels: per-validator scoring, per-scenario scoring, and summary scoring.
 
-- **1.0**: Perfect, no violations
-- **0.8-0.99**: Minor issues
-- **0.5-0.79**: Moderate issues
-- **0.0-0.49**: Major issues or failed
+### Per-Validator Scoring
 
-Violations are weighted by severity:
-- **Critical**: 1.0 weight
-- **Major**: 0.7 weight
-- **Minor**: 0.3 weight
+Each validator (Pattern, LLM Judge, ESLint) independently evaluates the generated code and produces a score from 0.0 to 1.0:
+
+#### Pattern Validator
+
+Uses exponential decay based on weighted violations:
+
+```
+score = e^(-totalWeight)
+```
+
+Where `totalWeight` is the sum of violation weights:
+- **Critical violations**: 1.0 weight each
+- **Major violations**: 0.7 weight each
+- **Minor violations**: 0.3 weight each
+
+**Examples**:
+- 0 violations → score = 1.0 (perfect)
+- 1 critical violation → score ≈ 0.37
+- 1 major violation → score ≈ 0.50
+- 2 minor violations → score ≈ 0.55
+
+#### LLM Judge Validator
+
+The LLM (GPT-4 or other model) evaluates the code semantically and returns:
+- An `overallScore` from 0.0 to 1.0
+- A list of violations with explanations
+- Passed if: score ≥ 0.7 AND no violations
+
+The LLM judge provides semantic understanding beyond pattern matching, evaluating whether the code actually solves the problem correctly and follows best practices.
+
+#### ESLint Validator
+
+Uses exponential decay with a dampening factor:
+
+```
+score = e^(-totalWeight / 2)
+```
+
+ESLint violations are mapped to severity:
+- ESLint error (severity 2) → **Major** violation (0.7 weight)
+- ESLint warning (severity 1) → **Minor** violation (0.3 weight)
+
+The `/2` dampening factor makes ESLint less punitive since projects often have many minor linting issues.
+
+### Per-Scenario Scoring
+
+Each scenario receives an **overall score** calculated as:
+
+```
+overallScore = average of all active validator scores
+```
+
+**Active validators** are those that:
+- Are configured in the scenario's `validationStrategy`
+- Successfully ran (did not return score = -1)
+
+**Pass/Fail Criteria**:
+- ✅ **PASS**: `overallScore ≥ 0.8` AND `violations.length === 0`
+- ❌ **FAIL**: `overallScore < 0.8` OR `violations.length > 0`
+- ⚠️ **SKIP**: An error occurred during evaluation (timeout, adapter failure, etc.)
+
+**Example**: If Pattern validator returns 0.9, LLM Judge returns 0.8, and ESLint is skipped:
+```
+overallScore = (0.9 + 0.8) / 2 = 0.85
+```
+
+### Summary Scoring
+
+After evaluating all scenarios, the framework calculates summary statistics:
+
+```javascript
+{
+  total: 10,              // Total number of scenarios
+  passed: 7,              // Scenarios with overallScore ≥ 0.8 and no violations
+  failed: 2,              // Scenarios evaluated but didn't pass
+  skipped: 1,             // Scenarios that encountered errors
+  averageScore: 0.78,     // Average of all scenario overallScores
+  totalViolations: 8      // Sum of violations across all scenarios
+}
+```
+
+**Average Score Calculation**:
+```
+averageScore = (sum of all scenario scores) / total scenarios
+```
+
+This includes scores from failed scenarios, providing an overall quality metric across your entire test suite.
+
+**Transparency**: When baselines are saved, the per-validator breakdown is included in the baseline file, allowing you to trace exactly which validator contributed what score. See [Baseline File Format](#baseline-file-format) for details.
+
+### Score Interpretation
+
+| Score Range | Interpretation | Typical Meaning |
+|-------------|----------------|-----------------|
+| **1.0** | Perfect | No violations detected by any validator |
+| **0.8-0.99** | Minor issues | Small violations or stylistic concerns |
+| **0.5-0.79** | Moderate issues | Several violations or some significant problems |
+| **0.0-0.49** | Major issues | Many violations or critical problems |
+
+### Baseline Comparison
+
+When baseline tracking is enabled, you'll see delta metrics:
+
+```bash
+✓ [1/3] typescript-no-any PASS (score: 0.95)
+    ↑ +18.5% improvement from baseline
+```
+
+The percentage is calculated as:
+```
+percentage = (currentScore - baselineScore) / baselineScore * 100
+```
 
 ## Baseline Tracking
 
@@ -320,6 +425,62 @@ The `{model}` folder name depends on the adapter:
 When `compareBaseline` is enabled, the report will show score deltas and whether results improved or regressed.
 
 **Tip**: Add `.benchmarks/` to your `.gitignore` to keep baseline data local to each developer.
+
+### Baseline File Format
+
+Each baseline file contains complete transparency into how the score was calculated:
+
+```json
+{
+  "scenarioId": "typescript-no-any",
+  "score": 0.85,
+  "violations": [
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: :\\s*any\\b",
+      "file": "src/types.ts",
+      "line": 12,
+      "severity": "critical",
+      "details": "Matched: \"metadata: any\""
+    }
+  ],
+  "validationResults": [
+    {
+      "passed": false,
+      "score": 0.37,
+      "violations": [...],
+      "validatorType": "pattern"
+    },
+    {
+      "passed": true,
+      "score": 1.0,
+      "violations": [],
+      "validatorType": "llm-judge"
+    },
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "eslint",
+      "error": "ESLint not found"
+    }
+  ],
+  "timestamp": "2026-01-23T22:28:32.216Z",
+  "adapter": "copilot",
+  "model": "claude-sonnet-4.5"
+}
+```
+
+**Key fields**:
+- `score`: Overall scenario score (average of active validators)
+- `violations`: All violations from all validators combined
+- `validationResults`: Per-validator breakdown showing:
+  - Individual validator score
+  - Whether that validator passed
+  - Violations specific to that validator
+  - Any errors that occurred (`score: -1` means skipped)
+
+**Score Traceability**: With this format, you can always trace the overall score back to individual validator scores. For example, if you see `score: 0.067`, you can look at `validationResults` to see which validators contributed what scores (e.g., Pattern: 0.135, LLM Judge: 0.00).
 
 ## CLI Commands
 

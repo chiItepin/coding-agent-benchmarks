@@ -15,17 +15,23 @@ export interface User {
 /**
  * Generic categories for test scenarios
  */
-export type TestCategory = 'typescript' | 'react' | 'testing' | 'architecture' | 'performance' | 'general';
+export type TestCategory =
+  | "typescript"
+  | "react"
+  | "testing"
+  | "architecture"
+  | "performance"
+  | "general";
 
 /**
  * Severity levels for test scenarios
  */
-export type Severity = 'critical' | 'major' | 'minor';
+export type Severity = "critical" | "major" | "minor";
 
 /**
  * Supported adapter types
  */
-export type AdapterType = 'copilot' | 'claude-code';
+export type AdapterType = "copilot" | "claude-code";
 
 /**
  * Pattern matching configuration for code validation
@@ -185,7 +191,7 @@ export interface Violation {
   /**
    * Type of validation that found this violation
    */
-  type: 'pattern' | 'llm-judge' | 'eslint';
+  type: "pattern" | "llm-judge" | "eslint";
 
   /**
    * Description of the violation
@@ -236,7 +242,7 @@ export interface ValidationResult {
   /**
    * Type of validator that produced this result
    */
-  validatorType: 'pattern' | 'llm-judge' | 'eslint';
+  validatorType: "pattern" | "llm-judge" | "eslint";
 
   /**
    * Error message if the validator itself failed
@@ -374,7 +380,7 @@ export interface CodeGenerationAdapter {
   generate(
     prompt: string,
     contextFiles?: readonly string[],
-    timeout?: number | null
+    timeout?: number | null,
   ): Promise<string[]>;
 }
 
@@ -385,7 +391,7 @@ export interface CodeValidator {
   /**
    * Type identifier for this validator
    */
-  type: 'pattern' | 'llm-judge' | 'eslint';
+  type: "pattern" | "llm-judge" | "eslint";
 
   /**
    * Validate generated code
@@ -395,7 +401,7 @@ export interface CodeValidator {
    */
   validate(
     files: readonly string[],
-    scenario: TestScenario
+    scenario: TestScenario,
   ): Promise<ValidationResult>;
 }
 
