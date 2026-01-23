@@ -117,7 +117,13 @@ export class ProgressReporter {
     state.status = result.error ? "skip" : result.passed ? "pass" : "fail";
 
     if (this.isInteractive) {
-      this.render();
+      const hasBaselineOutput =
+        (this.compareBaseline && result.baselineComparison) ||
+        this.saveBaseline;
+
+      if (hasBaselineOutput) {
+        logUpdate.clear();
+      }
 
       if (this.compareBaseline && result.baselineComparison) {
         console.log(this.formatBaselineComparison(result.baselineComparison));
@@ -125,6 +131,8 @@ export class ProgressReporter {
       if (this.saveBaseline) {
         console.log(this.formatBaselineSave(model));
       }
+
+      this.render();
     } else {
       this.printScenarioResult(scenarioId, result, model);
     }

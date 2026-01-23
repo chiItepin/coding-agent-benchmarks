@@ -55,6 +55,57 @@ npx coding-agent-benchmarks evaluate --tag best-practices
 npx coding-agent-benchmarks evaluate --output report.json
 ```
 
+## Auto-Generate Scenarios from Your Coding Standards
+
+Save time by automatically generating validation scenarios from your existing coding standards!
+
+The `/auto-scenarios` skill discovers coding standards from your project files and creates realistic test scenarios that validate whether AI coding agents follow those standards.
+
+### What It Does
+
+- 🔍 **Discovers standards** from CLAUDE.md, tsconfig.json, .eslintrc, .prettierrc, and more
+- 📋 **Extracts actionable rules** like "No `any` types", "Use readonly for immutable data", "Single Responsibility Principle"
+- ✨ **Generates synthetic scenarios** with realistic prompts that naturally test each standard
+- 💾 **Writes to your config** - appends scenarios to your benchmarks.config.js
+
+### How to Use
+
+If you're using Claude Code CLI, simply run:
+
+```bash
+/auto-scenarios
+```
+
+The skill will:
+1. Scan your project for coding standard files
+2. Extract rules from each source
+3. Generate diverse test scenarios
+4. Show you a preview
+5. Ask where to write the scenarios (append to config, create new file, etc.)
+
+### What Gets Discovered
+
+The skill finds standards from:
+
+- **CLAUDE.md** / **.cursorrules** - Explicit AI coding instructions
+- **tsconfig.json** - TypeScript compiler settings
+- **.eslintrc*** - Linting rules
+- **.prettierrc*** - Formatting preferences
+- **package.json** - Project context
+- **CONTRIBUTING.md** - Contribution guidelines
+
+### Benefits
+
+✅ **Save hours** - Generate dozens of scenarios in seconds vs. manual writing
+
+✅ **Comprehensive** - Captures ALL your coding standards automatically
+
+✅ **Realistic prompts** - Creates scenarios developers would actually request
+
+✅ **Living documentation** - Standards become executable tests
+
+✅ **Synthetic data** - Varies complexity and context for thorough testing
+
 ## Configuration
 
 **Configuration is required.** Create a `benchmarks.config.js` (or `.ts`) file in your project root with your test scenarios:
