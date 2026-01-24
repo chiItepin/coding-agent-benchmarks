@@ -60,7 +60,7 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
    */
   private buildPrompt(
     prompt: string,
-    contextFiles?: readonly string[]
+    contextFiles?: readonly string[],
   ): string {
     const parts: string[] = [];
 
@@ -82,7 +82,7 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
     parts.push("# Task\n");
     parts.push(prompt);
     parts.push(
-      "\n\nCreate/update the necessary file(s). Do not output code to the terminal - write it to files instead."
+      "\n\nCreate/update the necessary file(s). Do not output code to the terminal - write it to files instead.",
     );
 
     return parts.join("\n");
@@ -95,7 +95,7 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
   async generate(
     prompt: string,
     contextFiles?: readonly string[],
-    timeout?: number | null
+    timeout?: number | null,
   ): Promise<string[]> {
     const fullPrompt = this.buildPrompt(prompt, contextFiles);
 
@@ -104,7 +104,10 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
 
     // Write prompt to temp file and pipe via stdin (matches @copilot-evals pattern)
     return new Promise((resolve, reject) => {
-      const tempFile = path.join(this.workspaceRoot, '.copilot-eval-prompt.txt');
+      const tempFile = path.join(
+        this.workspaceRoot,
+        ".copilot-eval-prompt.txt",
+      );
       fs.writeFileSync(tempFile, fullPrompt, "utf8");
 
       // Cleanup function
@@ -122,8 +125,8 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
       const cleanupOnExit = (): void => {
         cleanup();
       };
-      process.once('SIGINT', cleanupOnExit);
-      process.once('SIGTERM', cleanupOnExit);
+      process.once("SIGINT", cleanupOnExit);
+      process.once("SIGTERM", cleanupOnExit);
 
       const command = `cat "${tempFile}" | copilot --model ${this.model} --allow-all-tools --deny-tool 'shell(rm)' --deny-tool 'shell(git push)' --deny-tool 'shell(git commit)'`;
       const proc = spawn("sh", ["-c", command], {
@@ -148,8 +151,8 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
         timeoutHandle = setTimeout(() => {
           proc.kill("SIGTERM");
           cleanup();
-          process.removeListener('SIGINT', cleanupOnExit);
-          process.removeListener('SIGTERM', cleanupOnExit);
+          process.removeListener("SIGINT", cleanupOnExit);
+          process.removeListener("SIGTERM", cleanupOnExit);
           reject(new Error(`Copilot CLI timed out after ${timeout}ms`));
         }, timeout);
       }
@@ -160,8 +163,8 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
         }
 
         cleanup();
-        process.removeListener('SIGINT', cleanupOnExit);
-        process.removeListener('SIGTERM', cleanupOnExit);
+        process.removeListener("SIGINT", cleanupOnExit);
+        process.removeListener("SIGTERM", cleanupOnExit);
 
         if (code !== 0) {
           reject(
@@ -175,7 +178,11 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
         // Get files changed during generation (diff before/after)
         try {
           const statusAfter = getGitStatusPorcelain(this.workspaceRoot);
-          const changedFiles = getChangedFilesDiff(statusBefore, statusAfter);
+          const changedFiles = getChangedFilesDiff(
+            statusBefore,
+            statusAfter,
+            this.workspaceRoot,
+          );
           resolve(changedFiles);
         } catch (error) {
           reject(new Error(`Failed to get changed files: ${error}`));
@@ -187,8 +194,8 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
           clearTimeout(timeoutHandle);
         }
         cleanup();
-        process.removeListener('SIGINT', cleanupOnExit);
-        process.removeListener('SIGTERM', cleanupOnExit);
+        process.removeListener("SIGINT", cleanupOnExit);
+        process.removeListener("SIGTERM", cleanupOnExit);
         reject(new Error(`Failed to spawn Copilot CLI: ${error}`));
       });
     });

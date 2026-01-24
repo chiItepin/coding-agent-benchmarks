@@ -375,6 +375,14 @@ export class ProgressReporter {
         : `+${percentStr}% improvement from baseline`;
       return `    ${arrow} ${text}`;
     } else {
+      if (percentage === 0) {
+        const dash = this.isInteractive ? chalk.yellow("–") : "–";
+        const text = this.isInteractive
+          ? chalk.yellow(`0.0% change from baseline`)
+          : `0.0% change from baseline`;
+        return `    ${dash} ${text}`;
+      }
+
       const arrow = this.isInteractive ? chalk.red("↓") : "↓";
       const text = this.isInteractive
         ? chalk.red(`-${percentStr}% regression from baseline`)

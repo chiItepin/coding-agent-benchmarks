@@ -78,7 +78,10 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
           model: this.options.model,
         });
       default:
-        throw new Error(`Unknown adapter type: ${type}`);
+        const validAdapters: AdapterType[] = ["copilot", "claude-code"];
+        throw new Error(
+          `Unknown adapter type: ${type}. Valid options: ${validAdapters.join(", ")}`,
+        );
     }
   }
 
@@ -189,20 +192,11 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
       }
 
       // LLM judge validator
-      console.log(
-        "[Evaluator] Creating LLM judge validator with model:",
-        this.options.model,
-      );
       const llmValidator = new LLMJudgeValidator(
         this.workspaceRoot,
         this.options.model,
       );
-      console.log("[Evaluator] Calling LLM judge validator...");
       const llmResult = await llmValidator.validate(generatedFiles, scenario);
-      console.log(
-        "[Evaluator] LLM judge result:",
-        JSON.stringify(llmResult, null, 2),
-      );
       validationResults.push(llmResult);
 
       if (this.options.verbose && llmResult.score >= 0) {

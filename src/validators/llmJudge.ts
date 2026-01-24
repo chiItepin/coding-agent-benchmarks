@@ -43,6 +43,14 @@ interface LLMJudgment {
   }>;
 }
 
+/**
+ * File content with its relative path
+ */
+interface FileWithContent {
+  path: string;
+  content: string;
+}
+
 const judgeSystemPrompt = `You are a code review judge evaluating whether generated code follows specific coding guidelines.
 
 Your task is to evaluate the provided code against a set of criteria and return a JSON assessment.
@@ -81,16 +89,13 @@ export class LLMJudgeValidator implements CodeValidator {
     files: readonly string[],
     scenario: TestScenario,
   ): Promise<ValidationResult> {
-    console.log("[LLM Judge] Starting validation for scenario:", scenario.id);
     const llmConfig = scenario.validationStrategy.llmJudge;
-    console.log("[LLM Judge] Config:", JSON.stringify(llmConfig, null, 2));
 
     // If LLM judge not enabled, skip
     if (!llmConfig?.enabled) {
-      console.log("[LLM Judge] SKIPPED: Not enabled in scenario config");
       return {
         passed: true,
-        score: -1,
+        score: -1, // Indicate skipped
         violations: [],
         validatorType: "llm-judge",
       };
@@ -98,11 +103,10 @@ export class LLMJudgeValidator implements CodeValidator {
 
     // If no API token, skip
     if (!this.apiToken) {
-      console.log("[LLM Judge] SKIPPED: GITHUB_TOKEN not found");
       console.warn("GITHUB_TOKEN not found, skipping LLM judge validation");
       return {
         passed: true,
-        score: -1,
+        score: -1, // Indicate skipped
         violations: [],
         validatorType: "llm-judge",
         error: "GITHUB_TOKEN not found",
@@ -110,10 +114,9 @@ export class LLMJudgeValidator implements CodeValidator {
     }
 
     try {
-      console.log("[LLM Judge] Reading generated files:", files);
       // Read all generated files
       const absolutePaths = resolveFilePaths(this.workspaceRoot, files);
-      const fileContents: Array<{ path: string; content: string }> = [];
+      const fileContents: FileWithContent[] = [];
 
       for (const filePath of absolutePaths) {
         if (!fs.existsSync(filePath)) {
@@ -131,19 +134,10 @@ export class LLMJudgeValidator implements CodeValidator {
         fileContents,
         llmConfig.judgmentPrompt,
       );
-      console.log(
-        "[LLM Judge] Built judgment prompt (length):",
-        judgmentPrompt.length,
-      );
 
-      // Call LLM API
+      // Calling LLM API
       const model = llmConfig.model || this.defaultModel;
-      console.log("[LLM Judge] Calling API with model:", model);
       const judgment = await this.callLLMAPI(judgmentPrompt, model);
-      console.log(
-        "[LLM Judge] Received judgment:",
-        JSON.stringify(judgment, null, 2),
-      );
 
       // Convert judgment to violations
       const violations: Violation[] = (judgment.violations ?? []).map((v) => ({
@@ -155,16 +149,13 @@ export class LLMJudgeValidator implements CodeValidator {
         details: judgment.reasoning,
       }));
 
-      const result = {
+      return {
         passed: judgment.passed,
         score: judgment.score,
         violations,
         validatorType: "llm-judge",
       };
-      console.log("[LLM Judge] Final result:", JSON.stringify(result, null, 2));
-      return result;
     } catch (error) {
-      console.log("[LLM Judge] ERROR:", error);
       return {
         passed: false,
         score: 0,
@@ -180,33 +171,33 @@ export class LLMJudgeValidator implements CodeValidator {
    */
   private buildJudgmentPrompt(
     scenario: TestScenario,
-    fileContents: Array<{ path: string; content: string }>,
+    fileContents: FileWithContent[],
     customPrompt?: string,
   ): string {
-    if (customPrompt) {
-      return customPrompt;
-    }
-
     const filesSection = fileContents
       .map((f) => `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
       .join("\n\n");
 
-    return `# Task Description
-${scenario.description}
-
-# Original Prompt Given to AI
-${scenario.prompt}
-
-# Generated Code
-${filesSection}
-
-# Evaluation Criteria
-Evaluate whether the generated code:
+    const evaluationCriteria =
+      customPrompt ||
+      `Evaluate whether the generated code:
 1. Correctly implements the requirements from the prompt
 2. Follows best practices for ${scenario.category}
 3. Meets the quality standards for a ${scenario.severity} severity scenario
 
 Be strict but fair in your evaluation.`;
+
+    return `# Task Description
+        ${scenario.description}
+
+        # Original Prompt Given to AI
+        ${scenario.prompt}
+
+        # Generated Code
+        ${filesSection}
+
+        # Evaluation Criteria
+      ${evaluationCriteria}`;
   }
 
   /**

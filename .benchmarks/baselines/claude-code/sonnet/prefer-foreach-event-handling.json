@@ -1,6 +1,6 @@
 {
   "scenarioId": "prefer-foreach-event-handling",
-  "score": 0.5,
+  "score": 1,
   "violations": [],
   "validationResults": [
     {
@@ -10,8 +10,8 @@
       "validatorType": "pattern"
     },
     {
-      "passed": false,
-      "score": 0,
+      "passed": true,
+      "score": 1,
       "violations": [],
       "validatorType": "llm-judge"
     },
@@ -22,7 +22,7 @@
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-01-24T01:13:10.618Z",
-  "adapter": "copilot",
-  "model": "claude-sonnet-4.5"
+  "timestamp": "2026-01-24T20:23:48.866Z",
+  "adapter": "claude-code",
+  "model": "sonnet"
 }

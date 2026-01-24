@@ -50,6 +50,7 @@ The `Evaluator` class extends `EventEmitter` and emits lifecycle events:
 ### Code Style
 - **Keep functions focused** - Single responsibility principle
 - **Avoid external dependencies** unless absolutely necessary
+- **Use arrow functions** - Always use arrow function syntax (`const fn = () => {}`) instead of regular functions (`function fn() {}`)
 - **Use readonly** for arrays/objects that shouldn't be mutated
 - **Use const assertions** for literal types (e.g., `as const`)
 - **Prefer forEach over for loops** when iterating for side effects (printing, mutating)

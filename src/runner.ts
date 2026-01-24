@@ -6,6 +6,7 @@
 
 import { Command } from "commander";
 import * as fs from "fs";
+import chalk from "chalk";
 import { loadConfig } from "./config/loader";
 import { Evaluator } from "./evaluator";
 import { AdapterType } from "./types";
@@ -13,6 +14,7 @@ import { CopilotCLIAdapter } from "./adapters/copilotCLI";
 import { ClaudeCodeCLIAdapter } from "./adapters/claudeCodeCLI";
 import { LLMJudgeValidator } from "./validators/llmJudge";
 import { checkGitHubAuth } from "./utils/githubAuth";
+import { processCLIError } from "./utils/errorHandler";
 import { ProgressReporter } from "./reporter";
 
 const program = new Command();
@@ -138,7 +140,7 @@ program
         process.exit(1);
       }
     } catch (error) {
-      console.error(`Error: ${error}`);
+      processCLIError(error, { adapter: options.adapter });
       process.exit(1);
     }
   });
