@@ -1,12 +1,7 @@
 #!/usr/bin/env node
 
-/**
- * CLI interface for coding-agent-benchmarks
- */
-
 import { Command } from "commander";
 import * as fs from "fs";
-import chalk from "chalk";
 import { loadConfig } from "./config/loader";
 import { Evaluator } from "./evaluator";
 import { AdapterType } from "./types";
@@ -79,7 +74,7 @@ program
         reporter.onScenarioStart(scenarioId);
       });
 
-      evaluator.on("scenario:generating", (scenarioId) => {
+      evaluator.on("scenario:generating", (_scenarioId) => {
         // Phase already set in onScenarioStart, but could be used for more granular updates
       });
 

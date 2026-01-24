@@ -1,6 +1,6 @@
 {
   "name": "coding-agent-benchmarks",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Testing coding agents (GitHub Copilot CLI, Claude Code, etc.) with your repo's context to evaluate their code generation quality.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,6 +10,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/runner.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "prepublishOnly": "npm run build",
     "test": "echo \"Tests not implemented yet\" && exit 0"
   },
@@ -57,8 +59,12 @@
     "log-update": "^4.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/node": "^25.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
     "eslint": "^9.39.2",
+    "globals": "^17.1.0",
     "prettier": "^3.8.0",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
