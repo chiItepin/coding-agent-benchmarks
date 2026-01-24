@@ -63,23 +63,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
   }
 
   /**
-   * Type-safe event emitter methods
-   */
-  override on<K extends keyof EvaluatorEvents>(
-    event: K,
-    listener: EvaluatorEvents[K],
-  ): this {
-    return super.on(event, listener);
-  }
-
-  override emit<K extends keyof EvaluatorEvents>(
-    event: K,
-    ...args: Parameters<EvaluatorEvents[K]>
-  ): boolean {
-    return super.emit(event, ...args);
-  }
-
-  /**
    * Create adapter instance based on type
    */
   private createAdapter(type: AdapterType): CodeGenerationAdapter {
@@ -206,11 +189,20 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
       }
 
       // LLM judge validator
+      console.log(
+        "[Evaluator] Creating LLM judge validator with model:",
+        this.options.model,
+      );
       const llmValidator = new LLMJudgeValidator(
         this.workspaceRoot,
         this.options.model,
       );
+      console.log("[Evaluator] Calling LLM judge validator...");
       const llmResult = await llmValidator.validate(generatedFiles, scenario);
+      console.log(
+        "[Evaluator] LLM judge result:",
+        JSON.stringify(llmResult, null, 2),
+      );
       validationResults.push(llmResult);
 
       if (this.options.verbose && llmResult.score >= 0) {

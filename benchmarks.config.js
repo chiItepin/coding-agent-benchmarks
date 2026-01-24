@@ -532,7 +532,7 @@ This is a comprehensive check for type safety.`,
 
     {
       id: 'prefer-foreach-event-handling',
-      category: 'general',
+      category: 'general2',
       severity: 'minor',
       tags: ['iteration', 'auto-generated', 'CLAUDE.md', 'pattern'],
       description: 'Use forEach for event dispatching and callback execution',

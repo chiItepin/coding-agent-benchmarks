@@ -2,11 +2,19 @@
  * LLM-as-Judge validator using GitHub Models API
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { CodeValidator, TestScenario, ValidationResult, Violation } from '../types';
-import { resolveFilePaths, resolveWorkspaceRoot } from '../utils/workspaceUtils';
-import { getGitHubToken } from '../utils/githubAuth';
+import * as fs from "fs";
+import * as path from "path";
+import {
+  CodeValidator,
+  TestScenario,
+  ValidationResult,
+  Violation,
+} from "../types";
+import {
+  resolveFilePaths,
+  resolveWorkspaceRoot,
+} from "../utils/workspaceUtils";
+import { getGitHubToken } from "../utils/githubAuth";
 
 /**
  * API response format from GitHub Models API
@@ -14,7 +22,7 @@ import { getGitHubToken } from '../utils/githubAuth';
 interface LLMAPIResponse {
   evaluations: Array<{
     criterion: string;
-    result: 'PASS' | 'FAIL' | 'N/A';
+    result: "PASS" | "FAIL" | "N/A";
     explanation: string;
   }>;
   overallScore: number;
@@ -55,12 +63,12 @@ Respond ONLY with valid JSON in this exact format:
 }`;
 
 export class LLMJudgeValidator implements CodeValidator {
-  public readonly type = 'llm-judge' as const;
+  public readonly type = "llm-judge" as const;
   private workspaceRoot: string;
   private apiToken: string | undefined;
   private defaultModel: string;
 
-  constructor(workspaceRoot?: string, model: string = 'openai/gpt-4.1') {
+  constructor(workspaceRoot?: string, model: string = "openai/gpt-4.1") {
     this.workspaceRoot = resolveWorkspaceRoot(workspaceRoot);
     this.apiToken = getGitHubToken(); // Auto-detect from env or GitHub CLI
     this.defaultModel = model;
@@ -71,33 +79,38 @@ export class LLMJudgeValidator implements CodeValidator {
    */
   async validate(
     files: readonly string[],
-    scenario: TestScenario
+    scenario: TestScenario,
   ): Promise<ValidationResult> {
+    console.log("[LLM Judge] Starting validation for scenario:", scenario.id);
     const llmConfig = scenario.validationStrategy.llmJudge;
+    console.log("[LLM Judge] Config:", JSON.stringify(llmConfig, null, 2));
 
     // If LLM judge not enabled, skip
     if (!llmConfig?.enabled) {
+      console.log("[LLM Judge] SKIPPED: Not enabled in scenario config");
       return {
         passed: true,
         score: -1,
         violations: [],
-        validatorType: 'llm-judge',
+        validatorType: "llm-judge",
       };
     }
 
     // If no API token, skip
     if (!this.apiToken) {
-      console.warn('GITHUB_TOKEN not found, skipping LLM judge validation');
+      console.log("[LLM Judge] SKIPPED: GITHUB_TOKEN not found");
+      console.warn("GITHUB_TOKEN not found, skipping LLM judge validation");
       return {
         passed: true,
         score: -1,
         violations: [],
-        validatorType: 'llm-judge',
-        error: 'GITHUB_TOKEN not found',
+        validatorType: "llm-judge",
+        error: "GITHUB_TOKEN not found",
       };
     }
 
     try {
+      console.log("[LLM Judge] Reading generated files:", files);
       // Read all generated files
       const absolutePaths = resolveFilePaths(this.workspaceRoot, files);
       const fileContents: Array<{ path: string; content: string }> = [];
@@ -107,7 +120,7 @@ export class LLMJudgeValidator implements CodeValidator {
           continue;
         }
 
-        const content = fs.readFileSync(filePath, 'utf-8');
+        const content = fs.readFileSync(filePath, "utf-8");
         const relativePath = path.relative(this.workspaceRoot, filePath);
         fileContents.push({ path: relativePath, content });
       }
@@ -116,16 +129,25 @@ export class LLMJudgeValidator implements CodeValidator {
       const judgmentPrompt = this.buildJudgmentPrompt(
         scenario,
         fileContents,
-        llmConfig.judgmentPrompt
+        llmConfig.judgmentPrompt,
+      );
+      console.log(
+        "[LLM Judge] Built judgment prompt (length):",
+        judgmentPrompt.length,
       );
 
       // Call LLM API
       const model = llmConfig.model || this.defaultModel;
+      console.log("[LLM Judge] Calling API with model:", model);
       const judgment = await this.callLLMAPI(judgmentPrompt, model);
+      console.log(
+        "[LLM Judge] Received judgment:",
+        JSON.stringify(judgment, null, 2),
+      );
 
       // Convert judgment to violations
-      const violations: Violation[] = (judgment.violations ?? []).map(v => ({
-        type: 'llm-judge' as const,
+      const violations: Violation[] = (judgment.violations ?? []).map((v) => ({
+        type: "llm-judge" as const,
         message: v.message,
         file: v.file,
         line: v.line,
@@ -133,18 +155,21 @@ export class LLMJudgeValidator implements CodeValidator {
         details: judgment.reasoning,
       }));
 
-      return {
+      const result = {
         passed: judgment.passed,
         score: judgment.score,
         violations,
-        validatorType: 'llm-judge',
+        validatorType: "llm-judge",
       };
+      console.log("[LLM Judge] Final result:", JSON.stringify(result, null, 2));
+      return result;
     } catch (error) {
+      console.log("[LLM Judge] ERROR:", error);
       return {
         passed: false,
         score: 0,
         violations: [],
-        validatorType: 'llm-judge',
+        validatorType: "llm-judge",
         error: `LLM judge failed: ${error}`,
       };
     }
@@ -156,15 +181,15 @@ export class LLMJudgeValidator implements CodeValidator {
   private buildJudgmentPrompt(
     scenario: TestScenario,
     fileContents: Array<{ path: string; content: string }>,
-    customPrompt?: string
+    customPrompt?: string,
   ): string {
     if (customPrompt) {
       return customPrompt;
     }
 
     const filesSection = fileContents
-      .map(f => `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
-      .join('\n\n');
+      .map((f) => `### ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
+      .join("\n\n");
 
     return `# Task Description
 ${scenario.description}
@@ -187,36 +212,41 @@ Be strict but fair in your evaluation.`;
   /**
    * Call the GitHub Models API (or other LLM API)
    */
-  private async callLLMAPI(prompt: string, model: string): Promise<LLMJudgment> {
-    const apiUrl = 'https://models.github.ai/inference/chat/completions';
+  private async callLLMAPI(
+    prompt: string,
+    model: string,
+  ): Promise<LLMJudgment> {
+    const apiUrl = "https://models.github.ai/inference/chat/completions";
 
     const response = await fetch(apiUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${this.apiToken}`,
       },
       body: JSON.stringify({
         model,
         messages: [
-          { role: 'system', content: judgeSystemPrompt },
-          { role: 'user', content: prompt },
+          { role: "system", content: judgeSystemPrompt },
+          { role: "user", content: prompt },
         ],
         temperature: 0,
-        response_format: { type: 'json_object' },
+        response_format: { type: "json_object" },
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`GitHub Models API error: ${response.status} ${errorText}`);
+      throw new Error(
+        `GitHub Models API error: ${response.status} ${errorText}`,
+      );
     }
 
     const data = (await response.json()) as any;
     const content = data.choices[0]?.message?.content;
 
     if (!content) {
-      throw new Error('No content in LLM response');
+      throw new Error("No content in LLM response");
     }
 
     // Parse JSON response
@@ -229,14 +259,14 @@ Be strict but fair in your evaluation.`;
         apiResponse.overallScore == null ||
         apiResponse.summary == null
       ) {
-        throw new Error('Invalid judgment structure');
+        throw new Error("Invalid judgment structure");
       }
 
       // Transform API response to internal judgment format
       // Extract violations from FAIL evaluations
       const violations = apiResponse.evaluations
-        .filter(e => e.result === 'FAIL')
-        .map(e => ({
+        .filter((e) => e.result === "FAIL")
+        .map((e) => ({
           message: `${e.criterion}: ${e.explanation}`,
         }));
 
@@ -252,7 +282,9 @@ Be strict but fair in your evaluation.`;
 
       return judgment;
     } catch (error) {
-      throw new Error(`Failed to parse LLM response: ${error}\nContent: ${content}`);
+      throw new Error(
+        `Failed to parse LLM response: ${error}\nContent: ${content}`,
+      );
     }
   }
 
@@ -261,7 +293,7 @@ Be strict but fair in your evaluation.`;
    */
   async testJudge(prompt: string, model?: string): Promise<string> {
     if (!this.apiToken) {
-      return 'Error: GITHUB_TOKEN not found';
+      return "Error: GITHUB_TOKEN not found";
     }
 
     try {
