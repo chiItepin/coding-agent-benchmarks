@@ -320,6 +320,8 @@ The LLM judge provides semantic understanding beyond pattern matching, evaluatin
 
 #### ESLint Validator
 
+This validator runs ESLint on the generated code and scores based on the number and severity of linting violations. Note that ESLint must be installed and configured in your project for this validator to work. If you don't have ESLint set up globally, disable this validator or provide a custom validator.
+
 Uses exponential decay with a dampening factor:
 
 ```

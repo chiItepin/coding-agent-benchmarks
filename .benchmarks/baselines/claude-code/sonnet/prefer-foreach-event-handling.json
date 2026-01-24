@@ -1,7 +1,24 @@
 {
   "scenarioId": "prefer-foreach-event-handling",
-  "score": 1,
-  "violations": [],
+  "score": 0.9136060735605726,
+  "violations": [
+    {
+      "type": "eslint",
+      "message": "@typescript-eslint/no-explicit-any: Unexpected any. Specify a different type.",
+      "file": "dummy/TestEventEmitter.ts",
+      "line": 1,
+      "severity": "minor",
+      "details": "Column 32"
+    },
+    {
+      "type": "eslint",
+      "message": "@typescript-eslint/no-explicit-any: Unexpected any. Specify a different type.",
+      "file": "dummy/TestEventEmitter.ts",
+      "line": 17,
+      "severity": "minor",
+      "details": "Column 39"
+    }
+  ],
   "validationResults": [
     {
       "passed": true,
@@ -16,13 +33,30 @@
       "validatorType": "llm-judge"
     },
     {
-      "passed": true,
-      "score": -1,
-      "violations": [],
+      "passed": false,
+      "score": 0.7408182206817179,
+      "violations": [
+        {
+          "type": "eslint",
+          "message": "@typescript-eslint/no-explicit-any: Unexpected any. Specify a different type.",
+          "file": "dummy/TestEventEmitter.ts",
+          "line": 1,
+          "severity": "minor",
+          "details": "Column 32"
+        },
+        {
+          "type": "eslint",
+          "message": "@typescript-eslint/no-explicit-any: Unexpected any. Specify a different type.",
+          "file": "dummy/TestEventEmitter.ts",
+          "line": 17,
+          "severity": "minor",
+          "details": "Column 39"
+        }
+      ],
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-01-24T20:48:16.466Z",
+  "timestamp": "2026-01-24T21:07:51.714Z",
   "adapter": "claude-code",
   "model": "sonnet"
 }

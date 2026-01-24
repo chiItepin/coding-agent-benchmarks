@@ -538,6 +538,9 @@ This is a comprehensive check for type safety.`,
       description: 'Use forEach for event dispatching and callback execution',
       prompt: `Create an TestEventEmitter class in a dummy directory that maintains a map of event names to listener functions. Implement the emit() method that triggers all registered listeners for a given event with the provided arguments. Dont consume it.`,
       validationStrategy: {
+        eslint: {
+          enabled: true,
+        },
         patterns: {
           requiredPatterns: [/\.forEach\(/],
         },

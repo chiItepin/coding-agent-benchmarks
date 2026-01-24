@@ -2,14 +2,22 @@
  * ESLint validator for generated code
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { CodeValidator, TestScenario, ValidationResult, Violation } from '../types';
-import { resolveFilePaths, resolveWorkspaceRoot } from '../utils/workspaceUtils';
-import { execSync } from 'child_process';
+import * as fs from "fs";
+import * as path from "path";
+import {
+  CodeValidator,
+  TestScenario,
+  ValidationResult,
+  Violation,
+} from "../types";
+import {
+  resolveFilePaths,
+  resolveWorkspaceRoot,
+} from "../utils/workspaceUtils";
+import { execSync } from "child_process";
 
 export class ESLintValidator implements CodeValidator {
-  public readonly type = 'eslint' as const;
+  public readonly type = "eslint" as const;
   private workspaceRoot: string;
 
   constructor(workspaceRoot?: string) {
@@ -22,9 +30,9 @@ export class ESLintValidator implements CodeValidator {
   private async checkESLintAvailability(): Promise<boolean> {
     try {
       // Check if eslint is installed
-      execSync('npx eslint --version', {
+      execSync("npx eslint --version", {
         cwd: this.workspaceRoot,
-        stdio: 'pipe',
+        stdio: "pipe",
       });
       return true;
     } catch {
@@ -37,7 +45,7 @@ export class ESLintValidator implements CodeValidator {
    */
   async validate(
     files: readonly string[],
-    scenario: TestScenario
+    scenario: TestScenario,
   ): Promise<ValidationResult> {
     const eslintConfig = scenario.validationStrategy.eslint;
 
@@ -45,22 +53,22 @@ export class ESLintValidator implements CodeValidator {
     if (!eslintConfig?.enabled) {
       return {
         passed: true,
-        score: -1,
+        score: -1, // skip
         violations: [],
-        validatorType: 'eslint',
+        validatorType: "eslint",
       };
     }
 
     // Check if ESLint is available
     const isAvailable = await this.checkESLintAvailability();
     if (!isAvailable) {
-      console.warn('ESLint not found in project, skipping ESLint validation');
+      console.warn("ESLint not found in project, skipping ESLint validation");
       return {
         passed: true,
         score: -1,
         violations: [],
-        validatorType: 'eslint',
-        error: 'ESLint not found',
+        validatorType: "eslint",
+        error: "ESLint not found",
       };
     }
 
@@ -76,7 +84,7 @@ export class ESLintValidator implements CodeValidator {
 
         // Only lint JS/TS files
         const ext = path.extname(filePath).toLowerCase();
-        if (!['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs'].includes(ext)) {
+        if (![".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"].includes(ext)) {
           continue;
         }
 
@@ -84,15 +92,15 @@ export class ESLintValidator implements CodeValidator {
           // Run ESLint with JSON output
           const configArg = eslintConfig.configPath
             ? `--config ${eslintConfig.configPath}`
-            : '';
+            : "";
 
           const output = execSync(
             `npx eslint ${configArg} --format json "${filePath}"`,
             {
               cwd: this.workspaceRoot,
-              encoding: 'utf-8',
-              stdio: 'pipe',
-            }
+              encoding: "utf-8",
+              stdio: "pipe",
+            },
           );
 
           // Parse ESLint output
@@ -104,17 +112,17 @@ export class ESLintValidator implements CodeValidator {
             for (const message of result.messages || []) {
               const severity =
                 message.severity === 2
-                  ? 'major'
+                  ? "major"
                   : message.severity === 1
-                    ? 'minor'
-                    : 'minor';
+                    ? "minor"
+                    : "minor";
 
               violations.push({
-                type: 'eslint',
+                type: "eslint",
                 message: `${message.ruleId}: ${message.message}`,
                 file: relativePath,
                 line: message.line,
-                severity: severity as 'major' | 'minor',
+                severity: severity as "major" | "minor",
                 details: `Column ${message.column}`,
               });
             }
@@ -131,17 +139,17 @@ export class ESLintValidator implements CodeValidator {
                 for (const message of result.messages || []) {
                   const severity =
                     message.severity === 2
-                      ? 'major'
+                      ? "major"
                       : message.severity === 1
-                        ? 'minor'
-                        : 'minor';
+                        ? "minor"
+                        : "minor";
 
                   violations.push({
-                    type: 'eslint',
+                    type: "eslint",
                     message: `${message.ruleId}: ${message.message}`,
                     file: relativePath,
                     line: message.line,
-                    severity: severity as 'major' | 'minor',
+                    severity: severity as "major" | "minor",
                     details: `Column ${message.column}`,
                   });
                 }
@@ -149,7 +157,7 @@ export class ESLintValidator implements CodeValidator {
             } catch {
               // If we can't parse the output, treat it as a general error
               violations.push({
-                type: 'eslint',
+                type: "eslint",
                 message: `ESLint failed for ${path.basename(filePath)}`,
                 file: path.relative(this.workspaceRoot, filePath),
                 severity: scenario.severity,
@@ -168,14 +176,14 @@ export class ESLintValidator implements CodeValidator {
         passed,
         score,
         violations,
-        validatorType: 'eslint',
+        validatorType: "eslint",
       };
     } catch (error) {
       return {
         passed: false,
         score: 0,
         violations: [],
-        validatorType: 'eslint',
+        validatorType: "eslint",
         error: `ESLint validation failed: ${error}`,
       };
     }

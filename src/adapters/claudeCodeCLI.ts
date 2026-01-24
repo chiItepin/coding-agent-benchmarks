@@ -131,6 +131,7 @@ export class ClaudeCodeCLIAdapter implements CodeGenerationAdapter {
         stdio: ["pipe", "pipe", "pipe"],
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       let stdout = "";
       let stderr = "";
 
