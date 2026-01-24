@@ -21,6 +21,7 @@ interface ScenarioState {
   status: ScenarioStatus;
   startTime?: number;
   result?: EvaluationResult;
+  model?: string;
 }
 
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -40,17 +41,19 @@ export class ProgressReporter {
   private compareBaseline: boolean;
   private adapter: string;
 
-  constructor(options: {
-    verbose?: boolean;
-    saveBaseline?: boolean;
-    compareBaseline?: boolean;
-    adapter?: string;
-  } = {}) {
+  constructor(
+    options: {
+      verbose?: boolean;
+      saveBaseline?: boolean;
+      compareBaseline?: boolean;
+      adapter?: string;
+    } = {},
+  ) {
     this.isInteractive = process.stdout.isTTY === true;
     this.verbose = options.verbose ?? false;
     this.saveBaseline = options.saveBaseline ?? false;
     this.compareBaseline = options.compareBaseline ?? false;
-    this.adapter = options.adapter ?? 'unknown';
+    this.adapter = options.adapter ?? "unknown";
   }
 
   start(scenarios: TestScenario[]): void {
@@ -108,30 +111,20 @@ export class ProgressReporter {
     }
   }
 
-  onScenarioComplete(scenarioId: string, result: EvaluationResult, model: string): void {
+  onScenarioComplete(
+    scenarioId: string,
+    result: EvaluationResult,
+    model: string,
+  ): void {
     const state = this.scenarios.get(scenarioId);
     if (!state) return;
 
     state.phase = "complete";
     state.result = result;
     state.status = result.error ? "skip" : result.passed ? "pass" : "fail";
+    state.model = model;
 
     if (this.isInteractive) {
-      const hasBaselineOutput =
-        (this.compareBaseline && result.baselineComparison) ||
-        this.saveBaseline;
-
-      if (hasBaselineOutput) {
-        logUpdate.clear();
-      }
-
-      if (this.compareBaseline && result.baselineComparison) {
-        console.log(this.formatBaselineComparison(result.baselineComparison));
-      }
-      if (this.saveBaseline) {
-        console.log(this.formatBaselineSave(model));
-      }
-
       this.render();
     } else {
       this.printScenarioResult(scenarioId, result, model);
@@ -198,6 +191,8 @@ export class ProgressReporter {
     const index = this.getScenarioIndex(state.scenario.id);
     const prefix = `[${index}/${this.totalScenarios}]`;
 
+    let line: string;
+
     switch (state.status) {
       case "runs": {
         const spinner = SPINNER_FRAMES[this.spinnerFrame];
@@ -206,26 +201,50 @@ export class ProgressReporter {
         const elapsed = state.startTime
           ? this.formatDuration(Date.now() - state.startTime)
           : "";
-        return `${chalk.yellow(spinner)} ${prefix} ${state.scenario.id} ${chalk.dim(phaseText)} ${chalk.dim(elapsed)}`;
+        line = `${chalk.yellow(spinner)} ${prefix} ${state.scenario.id} ${chalk.dim(phaseText)} ${chalk.dim(elapsed)}`;
+        break;
       }
       case "pass": {
         const score = state.result?.score.toFixed(2) ?? "0.00";
         const duration = state.result
           ? this.formatDuration(state.result.duration)
           : "";
-        return `${chalk.green("✓")} ${prefix} ${state.scenario.id} ${chalk.green("PASS")} ${chalk.dim(`(score: ${score})`)} ${chalk.dim(duration)}`;
+        line = `${chalk.green("✓")} ${prefix} ${state.scenario.id} ${chalk.green("PASS")} ${chalk.dim(`(score: ${score})`)} ${chalk.dim(duration)}`;
+        break;
       }
       case "fail": {
         const score = state.result?.score.toFixed(2) ?? "0.00";
         const duration = state.result
           ? this.formatDuration(state.result.duration)
           : "";
-        return `${chalk.red("✗")} ${prefix} ${state.scenario.id} ${chalk.red("FAIL")} ${chalk.dim(`(score: ${score})`)} ${chalk.dim(duration)}`;
+        line = `${chalk.red("✗")} ${prefix} ${state.scenario.id} ${chalk.red("FAIL")} ${chalk.dim(`(score: ${score})`)} ${chalk.dim(duration)}`;
+        break;
       }
       case "skip": {
-        return `${chalk.yellow("○")} ${prefix} ${state.scenario.id} ${chalk.yellow("SKIP")} ${chalk.dim("(error)")}`;
+        line = `${chalk.yellow("○")} ${prefix} ${state.scenario.id} ${chalk.yellow("SKIP")} ${chalk.dim("(error)")}`;
+        break;
       }
     }
+
+    if (state.phase === "complete" && state.result) {
+      const baselineLines: string[] = [];
+
+      if (this.compareBaseline && state.result.baselineComparison) {
+        baselineLines.push(
+          this.formatBaselineComparison(state.result.baselineComparison),
+        );
+      }
+
+      if (this.saveBaseline && state.model) {
+        baselineLines.push(this.formatBaselineSave(state.model));
+      }
+
+      if (baselineLines.length > 0) {
+        return line + "\n" + baselineLines.join("\n");
+      }
+    }
+
+    return line;
   }
 
   private printScenarioResult(
@@ -323,15 +342,26 @@ export class ProgressReporter {
     isImprovement: boolean;
   }): string {
     if (comparison.baselineScore === 0) {
-      const sign = comparison.delta >= 0 ? '+' : '';
-      const arrow = comparison.delta >= 0
-        ? (this.isInteractive ? chalk.green('↑') : '↑')
-        : (this.isInteractive ? chalk.red('↓') : '↓');
-      const text = this.isInteractive
-        ? (comparison.delta >= 0
-          ? chalk.green(`${sign}${comparison.delta.toFixed(2)} from baseline (0.00)`)
-          : chalk.red(`${sign}${comparison.delta.toFixed(2)} from baseline (0.00)`))
-        : `${sign}${comparison.delta.toFixed(2)} from baseline (0.00)`;
+      const sign = comparison.delta >= 0 ? "+" : "";
+      const arrow =
+        comparison.delta >= 0
+          ? this.isInteractive
+            ? chalk.green("↑")
+            : "↑"
+          : this.isInteractive
+            ? chalk.red("↓")
+            : "↓";
+
+      let text = `${sign}${comparison.delta.toFixed(2)} from baseline (0.00)`;
+      if (this.isInteractive) {
+        if (comparison.delta >= 0) {
+          text = chalk.green(text);
+        } else if (comparison.delta < 0) {
+          text = chalk.red(text);
+        } else {
+          text = chalk.yellow(text);
+        }
+      }
       return `    ${arrow} ${text}`;
     }
 
@@ -339,13 +369,13 @@ export class ProgressReporter {
     const percentStr = Math.abs(percentage).toFixed(1);
 
     if (comparison.isImprovement) {
-      const arrow = this.isInteractive ? chalk.green('↑') : '↑';
+      const arrow = this.isInteractive ? chalk.green("↑") : "↑";
       const text = this.isInteractive
         ? chalk.green(`+${percentStr}% improvement from baseline`)
         : `+${percentStr}% improvement from baseline`;
       return `    ${arrow} ${text}`;
     } else {
-      const arrow = this.isInteractive ? chalk.red('↓') : '↓';
+      const arrow = this.isInteractive ? chalk.red("↓") : "↓";
       const text = this.isInteractive
         ? chalk.red(`-${percentStr}% regression from baseline`)
         : `-${percentStr}% regression from baseline`;

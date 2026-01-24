@@ -11,5 +11,3 @@ export { TypedEventEmitter } from "./utils/TypedEventEmitter";
 export * from "./utils/gitUtils";
 export * from "./utils/workspaceUtils";
 export * from "./utils/githubAuth";
-export * from "./utils/transformArray";
-export * from "./utils/userUtils";
