@@ -104,6 +104,24 @@ export class ClaudeCodeCLIAdapter implements CodeGenerationAdapter {
       const tempFile = path.join(this.workspaceRoot, '.claude-eval-prompt.txt');
       fs.writeFileSync(tempFile, fullPrompt, 'utf8');
 
+      // Cleanup function
+      const cleanup = (): void => {
+        try {
+          if (fs.existsSync(tempFile)) {
+            fs.unlinkSync(tempFile);
+          }
+        } catch {
+          // Ignore cleanup errors
+        }
+      };
+
+      // Register cleanup on process termination
+      const cleanupOnExit = (): void => {
+        cleanup();
+      };
+      process.once('SIGINT', cleanupOnExit);
+      process.once('SIGTERM', cleanupOnExit);
+
       const command = `cat "${tempFile}" | claude --model ${this.model} --dangerously-skip-permissions --disallowed-tools 'Bash(rm)' --disallowed-tools 'Bash(git push)' --disallowed-tools 'Bash(git commit)'`;
       const proc = spawn('sh', ['-c', command], {
         cwd: this.workspaceRoot,
@@ -126,6 +144,9 @@ export class ClaudeCodeCLIAdapter implements CodeGenerationAdapter {
       if (timeout !== null && timeout !== undefined) {
         timeoutHandle = setTimeout(() => {
           proc.kill('SIGTERM');
+          cleanup();
+          process.removeListener('SIGINT', cleanupOnExit);
+          process.removeListener('SIGTERM', cleanupOnExit);
           reject(new Error(`Claude Code CLI timed out after ${timeout}ms`));
         }, timeout);
       }
@@ -135,12 +156,9 @@ export class ClaudeCodeCLIAdapter implements CodeGenerationAdapter {
           clearTimeout(timeoutHandle);
         }
 
-        // Clean up temp file
-        try {
-          fs.unlinkSync(tempFile);
-        } catch {
-          // Ignore cleanup errors
-        }
+        cleanup();
+        process.removeListener('SIGINT', cleanupOnExit);
+        process.removeListener('SIGTERM', cleanupOnExit);
 
         if (code !== 0) {
           reject(new Error(`Claude Code CLI exited with code ${code}\nStderr: ${stderr}`));
@@ -161,12 +179,9 @@ export class ClaudeCodeCLIAdapter implements CodeGenerationAdapter {
         if (timeoutHandle) {
           clearTimeout(timeoutHandle);
         }
-        // Clean up temp file
-        try {
-          fs.unlinkSync(tempFile);
-        } catch {
-          // Ignore cleanup errors
-        }
+        cleanup();
+        process.removeListener('SIGINT', cleanupOnExit);
+        process.removeListener('SIGTERM', cleanupOnExit);
         reject(new Error(`Failed to spawn Claude Code CLI: ${error}`));
       });
     });

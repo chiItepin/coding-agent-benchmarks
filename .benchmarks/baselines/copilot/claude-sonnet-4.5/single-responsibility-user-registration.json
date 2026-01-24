@@ -1,0 +1,28 @@
+{
+  "scenarioId": "single-responsibility-user-registration",
+  "score": 0,
+  "violations": [],
+  "validationResults": [
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "pattern"
+    },
+    {
+      "passed": false,
+      "score": 0,
+      "violations": [],
+      "validatorType": "llm-judge"
+    },
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "eslint"
+    }
+  ],
+  "timestamp": "2026-01-24T00:31:35.172Z",
+  "adapter": "copilot",
+  "model": "claude-sonnet-4.5"
+}
