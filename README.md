@@ -5,6 +5,8 @@ Open-source framework for evaluating AI coding assistants (like GitHub Copilot C
 
 ![WhatsApp Image 2026-01-23 at 9 04 49 AM](https://github.com/user-attachments/assets/3544d04f-37a5-47b0-a013-669c6015d26f)
 
+![WhatsApp Image 2026-01-24 at 1 58 31 PM](https://github.com/user-attachments/assets/f93ea3e0-74f8-4789-ab43-97245acc91b6)
+
 
 ## Features
 
@@ -270,6 +272,9 @@ validationStrategy: {
 The LLM judge requires a `GITHUB_TOKEN` environment variable with access to GitHub Models API.
 
 ### ESLint Integration
+
+![WhatsApp Image 2026-01-24 at 2 09 11 PM](https://github.com/user-attachments/assets/12af93e8-ed7c-4153-a183-20601a925965)
+
 
 Run ESLint on generated code:
 
