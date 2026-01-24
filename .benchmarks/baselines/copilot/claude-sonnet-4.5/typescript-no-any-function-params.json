@@ -1,25 +1,222 @@
 {
   "scenarioId": "typescript-no-any-function-params",
-  "score": 0.06766764161830635,
+  "score": 0.000003072106176664105,
   "violations": [
     {
       "type": "pattern",
       "message": "Forbidden pattern found: \\)\\s*=>",
-      "file": "src/utils/transformArray.ts",
-      "line": 1,
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 36,
       "severity": "critical",
-      "details": "Matched: \"export type FilterPredicate<T> = (item: T) => boolean;\""
+      "details": "Matched: \"return new Promise((resolve) => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 41,
+      "severity": "critical",
+      "details": "Matched: \"proc.on(\"close\", (code) => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 45,
+      "severity": "critical",
+      "details": "Matched: \"proc.on(\"error\", () => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 72,
+      "severity": "critical",
+      "details": "Matched: \".map((ctx) => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 106,
+      "severity": "critical",
+      "details": "Matched: \"return new Promise((resolve, reject) => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 119,
+      "severity": "critical",
+      "details": "Matched: \"proc.stdout?.on(\"data\", (data) => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 123,
+      "severity": "critical",
+      "details": "Matched: \"proc.stderr?.on(\"data\", (data) => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 130,
+      "severity": "critical",
+      "details": "Matched: \"timeoutHandle = setTimeout(() => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 142,
+      "severity": "critical",
+      "details": "Matched: \"proc.on(\"close\", (code) => {\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/adapters/copilotCLI.ts",
+      "line": 173,
+      "severity": "critical",
+      "details": "Matched: \"proc.on(\"error\", (error) => {\""
     },
     {
       "type": "pattern",
       "message": "Forbidden pattern found: \\)\\s*=>",
       "file": "src/utils/transformArray.ts",
-      "line": 9,
+      "line": 2,
       "severity": "critical",
-      "details": "Matched: \"mapper: (item: T, index: number) => U,\""
+      "details": "Matched: \"readonly predicate: (item: T) => boolean;\""
+    },
+    {
+      "type": "pattern",
+      "message": "Forbidden pattern found: \\)\\s*=>",
+      "file": "src/utils/transformArray.ts",
+      "line": 6,
+      "severity": "critical",
+      "details": "Matched: \"readonly mapper: (item: T, index: number, array: readonly T[]) => R;\""
     }
   ],
-  "timestamp": "2026-01-23T22:28:32.216Z",
+  "validationResults": [
+    {
+      "passed": false,
+      "score": 0.00000614421235332821,
+      "violations": [
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 36,
+          "severity": "critical",
+          "details": "Matched: \"return new Promise((resolve) => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 41,
+          "severity": "critical",
+          "details": "Matched: \"proc.on(\"close\", (code) => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 45,
+          "severity": "critical",
+          "details": "Matched: \"proc.on(\"error\", () => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 72,
+          "severity": "critical",
+          "details": "Matched: \".map((ctx) => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 106,
+          "severity": "critical",
+          "details": "Matched: \"return new Promise((resolve, reject) => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 119,
+          "severity": "critical",
+          "details": "Matched: \"proc.stdout?.on(\"data\", (data) => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 123,
+          "severity": "critical",
+          "details": "Matched: \"proc.stderr?.on(\"data\", (data) => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 130,
+          "severity": "critical",
+          "details": "Matched: \"timeoutHandle = setTimeout(() => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 142,
+          "severity": "critical",
+          "details": "Matched: \"proc.on(\"close\", (code) => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/adapters/copilotCLI.ts",
+          "line": 173,
+          "severity": "critical",
+          "details": "Matched: \"proc.on(\"error\", (error) => {\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/utils/transformArray.ts",
+          "line": 2,
+          "severity": "critical",
+          "details": "Matched: \"readonly predicate: (item: T) => boolean;\""
+        },
+        {
+          "type": "pattern",
+          "message": "Forbidden pattern found: \\)\\s*=>",
+          "file": "src/utils/transformArray.ts",
+          "line": 6,
+          "severity": "critical",
+          "details": "Matched: \"readonly mapper: (item: T, index: number, array: readonly T[]) => R;\""
+        }
+      ],
+      "validatorType": "pattern"
+    },
+    {
+      "passed": false,
+      "score": 0,
+      "violations": [],
+      "validatorType": "llm-judge"
+    },
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "eslint"
+    }
+  ],
+  "timestamp": "2026-01-23T22:43:37.822Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

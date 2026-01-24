@@ -107,6 +107,24 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
       const tempFile = path.join(this.workspaceRoot, '.copilot-eval-prompt.txt');
       fs.writeFileSync(tempFile, fullPrompt, "utf8");
 
+      // Cleanup function
+      const cleanup = (): void => {
+        try {
+          if (fs.existsSync(tempFile)) {
+            fs.unlinkSync(tempFile);
+          }
+        } catch {
+          // Ignore cleanup errors
+        }
+      };
+
+      // Register cleanup on process termination
+      const cleanupOnExit = (): void => {
+        cleanup();
+      };
+      process.once('SIGINT', cleanupOnExit);
+      process.once('SIGTERM', cleanupOnExit);
+
       const command = `cat "${tempFile}" | copilot --model ${this.model} --allow-all-tools --deny-tool 'shell(rm)' --deny-tool 'shell(git push)' --deny-tool 'shell(git commit)'`;
       const proc = spawn("sh", ["-c", command], {
         cwd: this.workspaceRoot,
@@ -129,6 +147,9 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
       if (timeout !== null && timeout !== undefined) {
         timeoutHandle = setTimeout(() => {
           proc.kill("SIGTERM");
+          cleanup();
+          process.removeListener('SIGINT', cleanupOnExit);
+          process.removeListener('SIGTERM', cleanupOnExit);
           reject(new Error(`Copilot CLI timed out after ${timeout}ms`));
         }, timeout);
       }
@@ -138,12 +159,9 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
           clearTimeout(timeoutHandle);
         }
 
-        // Clean up temp file
-        try {
-          fs.unlinkSync(tempFile);
-        } catch {
-          // Ignore cleanup errors
-        }
+        cleanup();
+        process.removeListener('SIGINT', cleanupOnExit);
+        process.removeListener('SIGTERM', cleanupOnExit);
 
         if (code !== 0) {
           reject(
@@ -168,12 +186,9 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
         if (timeoutHandle) {
           clearTimeout(timeoutHandle);
         }
-        // Clean up temp file
-        try {
-          fs.unlinkSync(tempFile);
-        } catch {
-          // Ignore cleanup errors
-        }
+        cleanup();
+        process.removeListener('SIGINT', cleanupOnExit);
+        process.removeListener('SIGTERM', cleanupOnExit);
         reject(new Error(`Failed to spawn Copilot CLI: ${error}`));
       });
     });

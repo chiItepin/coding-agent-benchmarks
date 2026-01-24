@@ -1,5 +1,5 @@
 {
-  "scenarioId": "typescript-strict-null-safety",
+  "scenarioId": "readonly-arrays-params",
   "score": 0.5,
   "violations": [],
   "validationResults": [
@@ -22,7 +22,7 @@
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-01-23T22:44:47.718Z",
+  "timestamp": "2026-01-23T22:48:51.478Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

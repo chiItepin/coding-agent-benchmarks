@@ -1,15 +1,28 @@
 {
   "scenarioId": "typescript-no-any-json-parsing",
-  "score": 0.6839397205857212,
-  "violations": [
+  "score": 1,
+  "violations": [],
+  "validationResults": [
     {
-      "type": "pattern",
-      "message": "Required pattern not found: interface|type\\s+\\w+Config",
-      "file": "src/config/parser.ts",
-      "severity": "critical"
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "validatorType": "pattern"
+    },
+    {
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "validatorType": "llm-judge"
+    },
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-01-23T22:29:33.943Z",
+  "timestamp": "2026-01-23T22:44:06.589Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

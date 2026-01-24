@@ -2,7 +2,6 @@
  * Main evaluation engine
  */
 
-import { EventEmitter } from "events";
 import {
   AdapterType,
   CodeGenerationAdapter,
@@ -18,19 +17,24 @@ import { LLMJudgeValidator } from "./validators/llmJudge";
 import { ESLintValidator } from "./validators/eslintValidator";
 import { resolveWorkspaceRoot } from "./utils/workspaceUtils";
 import { BaselineManager } from "./utils/baselineManager";
+import { TypedEventEmitter } from "./utils/TypedEventEmitter";
 
 /**
  * Events emitted by the Evaluator during execution
  */
-export interface EvaluatorEvents {
+export type EvaluatorEvents = {
   "evaluation:start": (scenarios: TestScenario[]) => void;
   "scenario:start": (scenarioId: string, scenario: TestScenario) => void;
   "scenario:generating": (scenarioId: string) => void;
   "scenario:validating": (scenarioId: string) => void;
-  "scenario:complete": (scenarioId: string, result: EvaluationResult, model: string) => void;
+  "scenario:complete": (
+    scenarioId: string,
+    result: EvaluationResult,
+    model: string,
+  ) => void;
   "evaluation:complete": (report: EvaluationReport) => void;
   log: (message: string) => void;
-}
+};
 
 export interface EvaluatorOptions {
   adapter: AdapterType;
@@ -42,7 +46,7 @@ export interface EvaluatorOptions {
   compareBaseline?: boolean;
 }
 
-export class Evaluator extends EventEmitter {
+export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
   private adapter: CodeGenerationAdapter;
   private workspaceRoot: string;
   private baselineManager: BaselineManager;
@@ -318,7 +322,12 @@ export class Evaluator extends EventEmitter {
       results.push(result);
 
       // Emit scenario complete event with model
-      this.emit("scenario:complete", scenario.id, result, this.adapter.getModel());
+      this.emit(
+        "scenario:complete",
+        scenario.id,
+        result,
+        this.adapter.getModel(),
+      );
     }
 
     // Calculate summary statistics

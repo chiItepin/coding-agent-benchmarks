@@ -5,11 +5,38 @@
     {
       "type": "pattern",
       "message": "Required pattern not found: async\\s+function\\s+\\w+\\([^)]*\\)\\s*:\\s*Promise<",
-      "file": "src/fetchUserData.ts",
+      "file": "src/utils/fetchUserData.ts",
       "severity": "critical"
     }
   ],
-  "timestamp": "2026-01-23T22:30:22.931Z",
+  "validationResults": [
+    {
+      "passed": false,
+      "score": 0.36787944117144233,
+      "violations": [
+        {
+          "type": "pattern",
+          "message": "Required pattern not found: async\\s+function\\s+\\w+\\([^)]*\\)\\s*:\\s*Promise<",
+          "file": "src/utils/fetchUserData.ts",
+          "severity": "critical"
+        }
+      ],
+      "validatorType": "pattern"
+    },
+    {
+      "passed": false,
+      "score": 0,
+      "violations": [],
+      "validatorType": "llm-judge"
+    },
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "eslint"
+    }
+  ],
+  "timestamp": "2026-01-23T22:45:10.474Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

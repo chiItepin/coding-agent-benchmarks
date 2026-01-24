@@ -2,7 +2,27 @@
   "scenarioId": "typescript-no-any",
   "score": 1,
   "violations": [],
-  "timestamp": "2026-01-23T22:28:05.245Z",
+  "validationResults": [
+    {
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "validatorType": "pattern"
+    },
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "llm-judge"
+    },
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "eslint"
+    }
+  ],
+  "timestamp": "2026-01-23T22:43:05.853Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }
