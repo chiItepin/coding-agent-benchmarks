@@ -341,7 +341,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
       }
     }
 
-    // Calculate summary statistics
     const passed = results.filter((r) => r.passed).length;
     const failed = results.filter((r) => !r.passed && !r.error).length;
     const skipped = results.filter((r) => r.error).length;

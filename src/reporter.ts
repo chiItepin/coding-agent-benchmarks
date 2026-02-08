@@ -22,6 +22,7 @@ interface ScenarioState {
   startTime?: number;
   result?: EvaluationResult;
   model?: string;
+  persisted?: boolean;
 }
 
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -125,7 +126,7 @@ export class ProgressReporter {
     state.model = model;
 
     if (this.isInteractive) {
-      this.render();
+      this.persistCompletedScenarios();
     } else {
       this.printScenarioResult(scenarioId, result, model);
     }
@@ -145,7 +146,7 @@ export class ProgressReporter {
     this.stopSpinner();
 
     if (this.isInteractive) {
-      logUpdate.done();
+      logUpdate.clear();
     }
 
     this.printSummary(report);
@@ -178,13 +179,36 @@ export class ProgressReporter {
 
     for (const scenarioId of this.scenarioOrder) {
       const state = this.scenarios.get(scenarioId);
-      if (!state) continue;
+      if (!state || state.persisted) continue;
 
       const line = this.formatScenarioLine(state);
       lines.push(line);
     }
 
-    logUpdate(lines.join("\n"));
+    if (lines.length > 0) {
+      logUpdate(lines.join("\n"));
+    } else {
+      logUpdate.clear();
+    }
+  }
+
+  /**
+   * Persist completed scenario lines to stdout so they don't get
+   * re-rendered by the spinner and duplicated in the scrollback buffer.
+   */
+  private persistCompletedScenarios(): void {
+    logUpdate.clear();
+
+    for (const scenarioId of this.scenarioOrder) {
+      const state = this.scenarios.get(scenarioId);
+      if (!state || state.persisted || state.phase !== "complete") continue;
+
+      const line = this.formatScenarioLine(state);
+      console.log(line);
+      state.persisted = true;
+    }
+
+    this.render();
   }
 
   private formatScenarioLine(state: ScenarioState): string {

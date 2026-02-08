@@ -1,7 +1,14 @@
 {
   "scenarioId": "error-handling-descriptive",
-  "score": 0.5,
-  "violations": [],
+  "score": 0.875,
+  "violations": [
+    {
+      "type": "llm-judge",
+      "message": "Error types are appropriate (not generic Error for everything): All errors are wrapped in generic Error objects; no use of more specific error types (e.g., custom error classes or built-in error types like TypeError or FileNotFoundError).",
+      "severity": "major",
+      "details": "Error handling is robust and descriptive, but only generic Error is used for all cases."
+    }
+  ],
   "validationResults": [
     {
       "passed": true,
@@ -11,8 +18,15 @@
     },
     {
       "passed": false,
-      "score": 0,
-      "violations": [],
+      "score": 0.75,
+      "violations": [
+        {
+          "type": "llm-judge",
+          "message": "Error types are appropriate (not generic Error for everything): All errors are wrapped in generic Error objects; no use of more specific error types (e.g., custom error classes or built-in error types like TypeError or FileNotFoundError).",
+          "severity": "major",
+          "details": "Error handling is robust and descriptive, but only generic Error is used for all cases."
+        }
+      ],
       "validatorType": "llm-judge"
     },
     {
@@ -22,7 +36,7 @@
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-02-08T21:13:54.884Z",
+  "timestamp": "2026-02-08T22:09:17.110Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

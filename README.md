@@ -16,6 +16,20 @@ Open-source framework for evaluating AI coding assistants (like GitHub Copilot C
 - **Extensible**: Easy to add custom scenarios, validators, and adapters
 - **CLI & Programmatic API**: Use as a command-line tool or integrate into your workflow
 
+## How It Works
+
+The filesystem is both the **input context** (the agent reads your project structure, configs, and existing code) and the **output surface** (the agent generates or modifies files). Git is the mechanism to **observe and reset** that surface between runs.
+
+### Workspace Cleanup
+
+After each scenario completes, the framework automatically resets the workspace to its committed state using `git checkout` and `git clean`. This ensures:
+
+- **Scenario isolation** — Each scenario starts from the same clean baseline, preventing leftover files from one scenario from contaminating the next.
+- **Reproducible results** — The same scenario always runs against the same workspace state, regardless of execution order.
+- **Validation integrity** — Validators (Pattern, ESLint, LLM Judge) only evaluate changes from the current scenario.
+
+The `.benchmarks/` directory is excluded from cleanup so baseline results persist across scenarios.
+
 ## Installation
 
 ```bash
