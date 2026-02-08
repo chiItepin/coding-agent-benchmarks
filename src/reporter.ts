@@ -201,7 +201,9 @@ export class ProgressReporter {
 
     for (const scenarioId of this.scenarioOrder) {
       const state = this.scenarios.get(scenarioId);
-      if (!state || state.persisted || state.phase !== "complete") continue;
+      if (!state || state.persisted || state.phase !== "complete") {
+        continue;
+      }
 
       const line = this.formatScenarioLine(state);
       console.log(line);

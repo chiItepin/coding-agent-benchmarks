@@ -4,9 +4,9 @@
   "violations": [
     {
       "type": "llm-judge",
-      "message": "Error types are appropriate (not generic Error for everything): All errors are wrapped in generic Error objects; no use of more specific error types (e.g., custom error classes or built-in error types like TypeError or FileNotFoundError).",
+      "message": "Error types are appropriate (not generic Error for everything): The code uses generic Error for all thrown errors, rather than more specific error types (e.g., FileNotFoundError, ValidationError).",
       "severity": "major",
-      "details": "Error handling is robust and descriptive, but only generic Error is used for all cases."
+      "details": "Error handling is robust and descriptive, but only generic Error is used for all error cases."
     }
   ],
   "validationResults": [
@@ -22,9 +22,9 @@
       "violations": [
         {
           "type": "llm-judge",
-          "message": "Error types are appropriate (not generic Error for everything): All errors are wrapped in generic Error objects; no use of more specific error types (e.g., custom error classes or built-in error types like TypeError or FileNotFoundError).",
+          "message": "Error types are appropriate (not generic Error for everything): The code uses generic Error for all thrown errors, rather than more specific error types (e.g., FileNotFoundError, ValidationError).",
           "severity": "major",
-          "details": "Error handling is robust and descriptive, but only generic Error is used for all cases."
+          "details": "Error handling is robust and descriptive, but only generic Error is used for all error cases."
         }
       ],
       "validatorType": "llm-judge"
@@ -36,7 +36,7 @@
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-02-08T22:09:17.110Z",
+  "timestamp": "2026-02-08T22:17:04.617Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }
