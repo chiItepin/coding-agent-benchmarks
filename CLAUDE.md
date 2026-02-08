@@ -231,6 +231,8 @@ const process = (data) => { // ❌ No type
 };
 ```
 
+Prefer typing args over jsdoc.
+
 ## Documentation
 
 - **README.md** - User-facing documentation, installation, usage

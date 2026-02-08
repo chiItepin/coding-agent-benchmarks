@@ -11,6 +11,7 @@ import { LLMJudgeValidator } from "./validators/llmJudge";
 import { checkGitHubAuth } from "./utils/githubAuth";
 import { processCLIError } from "./utils/errorHandler";
 import { ProgressReporter } from "./reporter";
+import { getChangedFilesExcluding } from "./utils/gitUtils";
 
 const program = new Command();
 
@@ -48,6 +49,20 @@ program
       const { config, scenarios } = await loadConfig(
         options.workspaceRoot || process.cwd(),
       );
+
+      // Check if workspace is clean (excluding .benchmarks/)
+      const workspaceRoot = options.workspaceRoot || process.cwd();
+      const changedFiles = getChangedFilesExcluding(workspaceRoot, [
+        ".benchmarks",
+      ]);
+      if (changedFiles.length > 0) {
+        console.error(
+          "\n❌ Workspace has uncommitted changes. Please commit or stash changes before running evaluations.\n",
+        );
+        console.error("Changed files (excluding .benchmarks/):");
+        changedFiles.forEach((file) => console.error(`  - ${file}`));
+        process.exit(1);
+      }
 
       const evaluator = new Evaluator({
         adapter: options.adapter as AdapterType,

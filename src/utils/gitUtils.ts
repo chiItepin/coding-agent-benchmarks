@@ -6,11 +6,6 @@ import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
-/**
- * Get git status in porcelain format
- * @param workspaceRoot The workspace root directory
- * @returns Git status output
- */
 export const getGitStatusPorcelain = (workspaceRoot: string): string => {
   try {
     return execSync("git status --porcelain", {
@@ -23,24 +18,16 @@ export const getGitStatusPorcelain = (workspaceRoot: string): string => {
   }
 };
 
-/**
- * Parse git status porcelain output to get changed files
- * @param statusOutput Output from git status --porcelain
- * @returns Array of file paths that were changed
- */
 export const parseGitStatus = (statusOutput: string): string[] => {
-  const lines = statusOutput
-    .trim()
-    .split("\n")
-    .filter((line) => line.length > 0);
+  const lines = statusOutput.split("\n").filter((line) => line.length > 0);
   const files: string[] = [];
 
   for (const line of lines) {
-    // Git porcelain format: XY filename
-    // X = index status, Y = working tree status
-    // We extract the filename (everything after first 3 characters)
-    if (line.length > 3) {
-      const filename = line.substring(3).trim();
+    // Git porcelain format: XY filename (XY = 2 status chars, then a space, then path)
+    // Use regex to reliably extract the path regardless of leading whitespace trimming
+    const match = /^.{2}\s(.+)$/.exec(line);
+    if (match) {
+      const filename = match[1];
       // Handle renamed files (format: "old -> new")
       if (filename.includes(" -> ")) {
         const newFilename = filename.split(" -> ")[1];
@@ -54,14 +41,25 @@ export const parseGitStatus = (statusOutput: string): string[] => {
   return files;
 };
 
-/**
- * Get list of files that have changed in the working directory
- * @param workspaceRoot The workspace root directory
- * @returns Array of file paths that were changed
- */
 export const getChangedFiles = (workspaceRoot: string): string[] => {
   const statusOutput = getGitStatusPorcelain(workspaceRoot);
   return parseGitStatus(statusOutput);
+};
+
+export const getChangedFilesExcluding = (
+  workspaceRoot: string,
+  excludePaths: string[],
+): string[] => {
+  const allChangedFiles = getChangedFiles(workspaceRoot);
+  return allChangedFiles.filter((file) => {
+    // Check if file starts with any of the excluded paths
+    return !excludePaths.some((excludePath) => {
+      const normalizedExclude = excludePath.endsWith("/")
+        ? excludePath
+        : excludePath + "/";
+      return file.startsWith(normalizedExclude) || file === excludePath;
+    });
+  });
 };
 
 /**

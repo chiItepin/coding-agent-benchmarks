@@ -18,6 +18,7 @@ import { ESLintValidator } from "./validators/eslintValidator";
 import { resolveWorkspaceRoot } from "./utils/workspaceUtils";
 import { BaselineManager } from "./utils/baselineManager";
 import { TypedEventEmitter } from "./utils/TypedEventEmitter";
+import { execSync } from "child_process";
 
 /**
  * Events emitted by the Evaluator during execution
@@ -303,16 +304,41 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
       // Emit scenario start event
       this.emit("scenario:start", scenario.id, scenario);
 
-      const result = await this.evaluateScenario(scenario);
-      results.push(result);
+      try {
+        const result = await this.evaluateScenario(scenario);
+        results.push(result);
 
-      // Emit scenario complete event with model
-      this.emit(
-        "scenario:complete",
-        scenario.id,
-        result,
-        this.adapter.getModel(),
-      );
+        // Emit scenario complete event with model
+        this.emit(
+          "scenario:complete",
+          scenario.id,
+          result,
+          this.adapter.getModel(),
+        );
+      } finally {
+        // Cleanup git changes after scenario completes (success or failure)
+        try {
+          execSync("git checkout HEAD -- . ':!.benchmarks'", {
+            cwd: this.workspaceRoot,
+            stdio: "ignore",
+          });
+          execSync("git clean -fd -e .benchmarks/", {
+            cwd: this.workspaceRoot,
+            stdio: "ignore",
+          });
+          if (this.options.verbose) {
+            this.emit(
+              "log",
+              `  Cleaned workspace after scenario ${scenario.id}`,
+            );
+          }
+        } catch (error) {
+          this.emit(
+            "log",
+            `⚠️  Warning: Failed to cleanup after scenario ${scenario.id}: ${error}`,
+          );
+        }
+      }
     }
 
     // Calculate summary statistics
