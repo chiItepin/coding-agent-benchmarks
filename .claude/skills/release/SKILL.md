@@ -1,8 +1,6 @@
 ---
 name: release
 description: Bump package version, publish to npm, and commit with conventional commit format. Use when releasing a new version of the package.
-disable-model-invocation: true
-argument-hint: [patch|minor] (optional)
 ---
 
 # Release Workflow
