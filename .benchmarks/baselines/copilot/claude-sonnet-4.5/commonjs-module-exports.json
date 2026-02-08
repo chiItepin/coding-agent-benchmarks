@@ -1,5 +1,5 @@
 {
-  "scenarioId": "prefer-foreach-event-handling",
+  "scenarioId": "commonjs-module-exports",
   "score": 1,
   "violations": [],
   "validationResults": [
@@ -11,18 +11,18 @@
     },
     {
       "passed": true,
-      "score": 1,
+      "score": -1,
       "violations": [],
       "validatorType": "llm-judge"
     },
     {
       "passed": true,
-      "score": 1,
+      "score": -1,
       "violations": [],
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-02-08T21:37:28.950Z",
+  "timestamp": "2026-02-08T21:14:10.792Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

@@ -209,7 +209,11 @@ export class ProgressReporter {
         const duration = state.result
           ? this.formatDuration(state.result.duration)
           : "";
-        line = `${chalk.green("✓")} ${prefix} ${state.scenario.id} ${chalk.green("PASS")} ${chalk.dim(`(score: ${score})`)} ${chalk.dim(duration)}`;
+        const validators = state.result?.validationResults
+          .map((v) => v.validatorType)
+          .join(", ");
+        const validatorInfo = validators ? chalk.dim(`[${validators}]`) : "";
+        line = `${chalk.green("✓")} ${prefix} ${state.scenario.id} ${validatorInfo} ${chalk.green("PASS")} ${chalk.dim(`(score: ${score})`)} ${chalk.dim(duration)}`;
         break;
       }
       case "fail": {
@@ -217,7 +221,11 @@ export class ProgressReporter {
         const duration = state.result
           ? this.formatDuration(state.result.duration)
           : "";
-        line = `${chalk.red("✗")} ${prefix} ${state.scenario.id} ${chalk.red("FAIL")} ${chalk.dim(`(score: ${score})`)} ${chalk.dim(duration)}`;
+        const validators = state.result?.validationResults
+          .map((v) => v.validatorType)
+          .join(", ");
+        const validatorInfo = validators ? chalk.dim(`[${validators}]`) : "";
+        line = `${chalk.red("✗")} ${prefix} ${state.scenario.id} ${validatorInfo} ${chalk.red("FAIL")} ${chalk.dim(`(score: ${score})`)} ${chalk.dim(duration)}`;
         break;
       }
       case "skip": {

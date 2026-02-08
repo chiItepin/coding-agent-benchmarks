@@ -97,6 +97,13 @@ export class ClaudeCodeCLIAdapter implements CodeGenerationAdapter {
     contextFiles?: readonly string[],
     timeout?: number | null,
   ): Promise<string[]> {
+    const isAvailable = await this.checkAvailability();
+    if (!isAvailable) {
+      throw new Error(
+        "Claude Code CLI is not available. Please install it first: https://docs.anthropic.com/en/docs/build-with-claude/claude-code",
+      );
+    }
+
     const fullPrompt = this.buildPrompt(prompt, contextFiles);
 
     // Capture git status before generation

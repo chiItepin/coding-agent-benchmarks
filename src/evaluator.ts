@@ -203,7 +203,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
         this.emit("log", `  LLM judge: ${llmResult.score.toFixed(2)}`);
       }
 
-      // ESLint validator
       const eslintValidator = new ESLintValidator(this.workspaceRoot);
       const eslintResult = await eslintValidator.validate(
         generatedFiles,

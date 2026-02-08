@@ -1,0 +1,51 @@
+{
+  "scenarioId": "export-from-index",
+  "score": 0,
+  "violations": [
+    {
+      "type": "llm-judge",
+      "message": "Creates an index.ts (or index.js) file that re-exports the public API.: No code was provided, so it cannot be determined if an index.ts file exists or if it re-exports the public API.",
+      "severity": "minor",
+      "details": "No code was submitted, so the requirement for a barrel export cannot be evaluated."
+    }
+  ],
+  "validationResults": [
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "pattern"
+    },
+    {
+      "passed": false,
+      "score": 0,
+      "violations": [
+        {
+          "type": "llm-judge",
+          "message": "Creates an index.ts (or index.js) file that re-exports the public API.: No code was provided, so it cannot be determined if an index.ts file exists or if it re-exports the public API.",
+          "severity": "minor",
+          "details": "No code was submitted, so the requirement for a barrel export cannot be evaluated."
+        }
+      ],
+      "validatorType": "llm-judge"
+    },
+    {
+      "passed": true,
+      "score": -1,
+      "violations": [],
+      "validatorType": "eslint"
+    }
+  ],
+  "timestamp": "2026-02-08T21:06:14.004Z",
+  "adapter": "copilot",
+  "model": "claude-sonnet-4.5",
+  "aggregate": {
+    "totalRuns": 2,
+    "passRate": 0,
+    "medianScore": 0,
+    "meanScore": 0,
+    "minScore": 0,
+    "maxScore": 0,
+    "scoreStdDev": 0
+  }
+}

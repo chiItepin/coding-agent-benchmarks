@@ -1,11 +1,11 @@
 {
-  "scenarioId": "prefer-foreach-event-handling",
+  "scenarioId": "no-unused-variables",
   "score": 1,
   "violations": [],
   "validationResults": [
     {
       "passed": true,
-      "score": 1,
+      "score": -1,
       "violations": [],
       "validatorType": "pattern"
     },
@@ -17,12 +17,12 @@
     },
     {
       "passed": true,
-      "score": 1,
+      "score": -1,
       "violations": [],
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-02-08T21:37:28.950Z",
+  "timestamp": "2026-02-08T21:14:12.497Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

@@ -1,6 +1,6 @@
 {
-  "scenarioId": "prefer-foreach-event-handling",
-  "score": 1,
+  "scenarioId": "async-await-pattern",
+  "score": 0.5,
   "violations": [],
   "validationResults": [
     {
@@ -10,19 +10,19 @@
       "validatorType": "pattern"
     },
     {
-      "passed": true,
-      "score": 1,
+      "passed": false,
+      "score": 0,
       "violations": [],
       "validatorType": "llm-judge"
     },
     {
       "passed": true,
-      "score": 1,
+      "score": -1,
       "violations": [],
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-02-08T21:37:28.950Z",
+  "timestamp": "2026-02-08T21:13:52.228Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

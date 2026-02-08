@@ -1,28 +1,28 @@
 {
-  "scenarioId": "prefer-foreach-event-handling",
-  "score": 1,
+  "scenarioId": "no-redundant-jsdoc",
+  "score": 0,
   "violations": [],
   "validationResults": [
     {
       "passed": true,
-      "score": 1,
+      "score": -1,
       "violations": [],
       "validatorType": "pattern"
     },
     {
-      "passed": true,
-      "score": 1,
+      "passed": false,
+      "score": 0,
       "violations": [],
       "validatorType": "llm-judge"
     },
     {
       "passed": true,
-      "score": 1,
+      "score": -1,
       "violations": [],
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-02-08T21:37:28.950Z",
+  "timestamp": "2026-02-08T21:14:07.237Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

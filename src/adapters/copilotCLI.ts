@@ -29,9 +29,6 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
     this.model = options?.model || DEFAULT_MODEL;
   }
 
-  /**
-   * Check if GitHub Copilot CLI is available
-   */
   async checkAvailability(): Promise<boolean> {
     return new Promise((resolve) => {
       const proc = spawn("which", ["copilot"], {
@@ -97,6 +94,13 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
     contextFiles?: readonly string[],
     timeout?: number | null,
   ): Promise<string[]> {
+    const isAvailable = await this.checkAvailability();
+    if (!isAvailable) {
+      throw new Error(
+        "GitHub Copilot CLI is not available. Please install it first: https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli",
+      );
+    }
+
     const fullPrompt = this.buildPrompt(prompt, contextFiles);
 
     // Capture git status before generation
