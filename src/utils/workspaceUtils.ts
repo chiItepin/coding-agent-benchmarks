@@ -17,7 +17,6 @@ import { getGitRoot, isGitRepository } from './gitUtils';
  * @returns Absolute path to workspace root
  */
 export const resolveWorkspaceRoot = (explicitRoot?: string): string => {
-  // 1. Use explicit root if provided
   if (explicitRoot) {
     const resolved = path.resolve(explicitRoot);
     if (fs.existsSync(resolved)) {
@@ -26,7 +25,6 @@ export const resolveWorkspaceRoot = (explicitRoot?: string): string => {
     throw new Error(`Specified workspace root does not exist: ${resolved}`);
   }
 
-  // 2. Try to get git root
   try {
     const gitRoot = getGitRoot();
     if (gitRoot) {
@@ -36,7 +34,6 @@ export const resolveWorkspaceRoot = (explicitRoot?: string): string => {
     // Not a git repository, continue
   }
 
-  // 3. Fall back to current working directory
   return process.cwd();
 };
 
@@ -51,11 +48,9 @@ export const resolveFilePaths = (
   relativePaths: readonly string[]
 ): string[] => {
   return relativePaths.map(relativePath => {
-    // If already absolute, return as-is
     if (path.isAbsolute(relativePath)) {
       return relativePath;
     }
-    // Otherwise, resolve relative to workspace root
     return path.resolve(workspaceRoot, relativePath);
   });
 };

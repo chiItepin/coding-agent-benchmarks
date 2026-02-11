@@ -23,12 +23,9 @@ export const parseGitStatus = (statusOutput: string): string[] => {
   const files: string[] = [];
 
   for (const line of lines) {
-    // Git porcelain format: XY filename (XY = 2 status chars, then a space, then path)
-    // Use regex to reliably extract the path regardless of leading whitespace trimming
     const match = /^.{2}\s(.+)$/.exec(line);
     if (match) {
       const filename = match[1];
-      // Handle renamed files (format: "old -> new")
       if (filename.includes(" -> ")) {
         const newFilename = filename.split(" -> ")[1];
         files.push(newFilename);
@@ -52,7 +49,6 @@ export const getChangedFilesExcluding = (
 ): string[] => {
   const allChangedFiles = getChangedFiles(workspaceRoot);
   return allChangedFiles.filter((file) => {
-    // Check if file starts with any of the excluded paths
     return !excludePaths.some((excludePath) => {
       const normalizedExclude = excludePath.endsWith("/")
         ? excludePath
@@ -81,11 +77,9 @@ export const getChangedFilesDiff = (
 
   for (const line of afterLines) {
     if (!beforeLines.has(line)) {
-      // Extract file path (e.g. "?? src/file.tsx" becomes "src/file.tsx")
       const match = /^.{3}(.+)$/.exec(line);
       if (match) {
         const filePath = match[1];
-        // If it's a directory, list files inside it
         if (filePath.endsWith("/") && workspaceRoot) {
           const dirPath = path.join(workspaceRoot, filePath);
           const filesInDir = listFilesRecursively(dirPath, workspaceRoot);

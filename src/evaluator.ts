@@ -59,7 +59,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
     this.workspaceRoot = resolveWorkspaceRoot(options.workspaceRoot);
     this.baselineManager = new BaselineManager(this.workspaceRoot);
 
-    // Create adapter based on type
     this.adapter = this.createAdapter(options.adapter);
   }
 
@@ -106,20 +105,17 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
   ): TestScenario[] {
     let filtered = scenarios;
 
-    // Filter by scenario ID pattern
     if (filters.scenarioPattern) {
       const pattern = filters.scenarioPattern.replace(/\*/g, ".*");
       const regex = new RegExp(pattern);
       filtered = filtered.filter((s) => regex.test(s.id));
     }
 
-    // Filter by category
     if (filters.category) {
       const categories = filters.category.split(",").map((c) => c.trim());
       filtered = filtered.filter((s) => categories.includes(s.category));
     }
 
-    // Filter by tags
     if (filters.tags && filters.tags.length > 0) {
       filtered = filtered.filter((s) =>
         filters.tags!.some((tag) => s.tags.includes(tag)),
@@ -141,7 +137,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
         this.emit("log", `  Description: ${scenario.description}`);
       }
 
-      // Emit generating phase
       this.emit("scenario:generating", scenario.id);
 
       if (this.options.verbose) {
@@ -171,13 +166,10 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
         this.emit("log", `  Generated ${generatedFiles.length} file(s)`);
       }
 
-      // Emit validating phase
       this.emit("scenario:validating", scenario.id);
 
-      // Run validators
       const validationResults: ValidationResult[] = [];
 
-      // Pattern validator
       const patternValidator = new PatternValidator(this.workspaceRoot);
       const patternResult = await patternValidator.validate(
         generatedFiles,
@@ -192,7 +184,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
         );
       }
 
-      // LLM judge validator
       const llmValidator = new LLMJudgeValidator(
         this.workspaceRoot,
         this.options.model,
@@ -215,7 +206,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
         this.emit("log", `  ESLint: ${eslintResult.score.toFixed(2)}`);
       }
 
-      // Calculate overall score (average of non-skipped validators)
       const activeResults = validationResults.filter((r) => r.score >= 0);
       const overallScore =
         activeResults.length > 0
@@ -223,10 +213,8 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
             activeResults.length
           : 0;
 
-      // Collect all violations
       const allViolations = validationResults.flatMap((r) => r.violations);
 
-      // Check if passed (score above threshold and no violations)
       const passed = overallScore >= 0.8 && allViolations.length === 0;
 
       const result: EvaluationResult = {
@@ -238,7 +226,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
         duration: Date.now() - startTime,
       };
 
-      // Compare with baseline if requested
       if (this.options.compareBaseline) {
         const comparison = this.baselineManager.compareWithBaseline(
           result,
@@ -250,7 +237,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
         }
       }
 
-      // Save baseline if requested
       if (this.options.saveBaseline) {
         this.baselineManager.saveBaseline(
           result,
@@ -264,7 +250,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
       const errorMessage = String(error);
       const isTimeout = errorMessage.includes("timed out");
 
-      // Create a violation for timeout errors
       const violations = isTimeout
         ? [
             {
@@ -295,20 +280,17 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
     const startTime = Date.now();
     const results: EvaluationResult[] = [];
 
-    // Emit evaluation start event
     this.emit("evaluation:start", scenarios);
 
     for (let i = 0; i < scenarios.length; i++) {
       const scenario = scenarios[i];
 
-      // Emit scenario start event
       this.emit("scenario:start", scenario.id, scenario);
 
       try {
         const result = await this.evaluateScenario(scenario);
         results.push(result);
 
-        // Emit scenario complete event with model
         this.emit(
           "scenario:complete",
           scenario.id,
@@ -316,7 +298,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
           this.adapter.getModel(),
         );
       } finally {
-        // Cleanup git changes after scenario completes (success or failure)
         try {
           execSync("git checkout HEAD -- . ':!.benchmarks'", {
             cwd: this.workspaceRoot,
@@ -369,7 +350,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
       totalDuration: Date.now() - startTime,
     };
 
-    // Emit evaluation complete event
     this.emit("evaluation:complete", report);
 
     return report;

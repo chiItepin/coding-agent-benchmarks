@@ -55,12 +55,10 @@ export class BaselineManager {
     const baselinePath = this.getBaselinePath(adapter, model, result.scenario.id);
     const dir = path.dirname(baselinePath);
 
-    // Ensure directory exists
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    // Write baseline file
     fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2), 'utf-8');
   }
 
@@ -126,14 +124,12 @@ export class BaselineManager {
       return baselines;
     }
 
-    // If model specified, only search that model directory
     if (model) {
       const modelDir = path.join(adapterDir, model);
       if (fs.existsSync(modelDir)) {
         this.collectBaselinesFromDir(modelDir, baselines);
       }
     } else {
-      // Search all model directories
       const modelDirs = fs.readdirSync(adapterDir, { withFileTypes: true });
       for (const dir of modelDirs) {
         if (dir.isDirectory()) {

@@ -44,15 +44,12 @@ const findConfigFile = (cwd: string): string | null => {
 const loadConfigFromFile = async (configPath: string): Promise<BenchmarkConfig> => {
   const ext = path.extname(configPath);
 
-  // Load from package.json
   if (configPath.endsWith('package.json')) {
     const packageJson = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     return packageJson.benchmarks as BenchmarkConfig;
   }
 
-  // Load CommonJS or ESM
   try {
-    // For .ts files, we'd need tsx or ts-node
     if (ext === '.ts') {
       console.warn(
         'TypeScript config files require tsx to be installed. Falling back to default config.'
@@ -60,7 +57,6 @@ const loadConfigFromFile = async (configPath: string): Promise<BenchmarkConfig> 
       return {};
     }
 
-    // Use dynamic import for .js, .mjs, .cjs
     const configModule = await import(configPath);
     return configModule.default || configModule;
   } catch (error) {
@@ -107,7 +103,6 @@ export const loadConfig = async (cwd: string = process.cwd()): Promise<{
   scenarios: TestScenario[];
   configPath: string | null;
 }> => {
-  // Find config file
   const configPath = findConfigFile(cwd);
 
   if (!configPath) {
@@ -118,7 +113,6 @@ export const loadConfig = async (cwd: string = process.cwd()): Promise<{
 
   let config: BenchmarkConfig = {};
 
-  // Load user config
   try {
     config = await loadConfigFromFile(configPath);
     validateConfig(config);
@@ -127,7 +121,6 @@ export const loadConfig = async (cwd: string = process.cwd()): Promise<{
     throw new Error(`Failed to load config: ${error}`);
   }
 
-  // Ensure scenarios are defined
   if (!config.scenarios || config.scenarios.length === 0) {
     throw new Error(
       'No scenarios defined in config. Please add scenarios to your config file.'

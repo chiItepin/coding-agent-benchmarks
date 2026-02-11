@@ -103,10 +103,8 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
 
     const fullPrompt = this.buildPrompt(prompt, contextFiles);
 
-    // Capture git status before generation
     const statusBefore = getGitStatusPorcelain(this.workspaceRoot);
 
-    // Write prompt to temp file and pipe via stdin (matches @copilot-evals pattern)
     return new Promise((resolve, reject) => {
       const tempFile = path.join(
         this.workspaceRoot,
@@ -114,7 +112,6 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
       );
       fs.writeFileSync(tempFile, fullPrompt, "utf8");
 
-      // Cleanup function
       const cleanup = (): void => {
         try {
           if (fs.existsSync(tempFile)) {
@@ -125,7 +122,6 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
         }
       };
 
-      // Register cleanup on process termination
       const cleanupOnExit = (): void => {
         cleanup();
       };
@@ -149,7 +145,6 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
         stderr += data.toString();
       });
 
-      // Set timeout only if specified (null/undefined = no timeout)
       let timeoutHandle: NodeJS.Timeout | null = null;
       if (timeout !== null && timeout !== undefined) {
         timeoutHandle = setTimeout(() => {
@@ -179,7 +174,6 @@ export class CopilotCLIAdapter implements CodeGenerationAdapter {
           return;
         }
 
-        // Get files changed during generation (diff before/after)
         try {
           const statusAfter = getGitStatusPorcelain(this.workspaceRoot);
           const changedFiles = getChangedFilesDiff(

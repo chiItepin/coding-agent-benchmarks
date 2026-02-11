@@ -50,7 +50,6 @@ program
         options.workspaceRoot || process.cwd(),
       );
 
-      // Check if workspace is clean (excluding .benchmarks/)
       const workspaceRoot = options.workspaceRoot || process.cwd();
       const changedFiles = getChangedFilesExcluding(workspaceRoot, [
         ".benchmarks",
@@ -105,7 +104,6 @@ program
         reporter.log(message);
       });
 
-      // Check adapter availability
       const isAvailable = await evaluator.checkAdapterAvailability();
       if (!isAvailable) {
         console.error(`Error: ${options.adapter} CLI not found`);
@@ -115,7 +113,6 @@ program
         process.exit(1);
       }
 
-      // Filter scenarios
       const filteredScenarios = evaluator.filterScenarios(scenarios, {
         scenarioPattern: options.scenario,
         category: options.category,
@@ -129,13 +126,10 @@ program
         return;
       }
 
-      // Run evaluation
       const report = await evaluator.evaluate(filteredScenarios);
 
-      // Finish reporter and display summary
       reporter.finish(report);
 
-      // Export JSON report if requested
       if (options.output) {
         fs.writeFileSync(
           options.output,
@@ -145,7 +139,6 @@ program
         console.log(`\nReport exported to: ${options.output}`);
       }
 
-      // Exit with error code if any scenarios failed
       if (report.summary.failed > 0 || report.summary.skipped > 0) {
         process.exit(1);
       }
@@ -169,7 +162,6 @@ program
 
       let filtered = scenarios;
 
-      // Filter by category
       if (options.category) {
         const categories = options.category
           .split(",")
@@ -177,7 +169,6 @@ program
         filtered = filtered.filter((s) => categories.includes(s.category));
       }
 
-      // Filter by tags
       if (options.tag) {
         const tags = options.tag.split(",").map((t: string) => t.trim());
         filtered = filtered.filter((s) =>
