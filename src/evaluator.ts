@@ -62,9 +62,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
     this.adapter = this.createAdapter(options.adapter);
   }
 
-  /**
-   * Create adapter instance based on type
-   */
   private createAdapter(type: AdapterType): CodeGenerationAdapter {
     switch (type) {
       case "copilot":
@@ -85,16 +82,10 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
     }
   }
 
-  /**
-   * Check if adapter is available
-   */
   async checkAdapterAvailability(): Promise<boolean> {
     return this.adapter.checkAvailability();
   }
 
-  /**
-   * Filter scenarios based on criteria
-   */
   filterScenarios(
     scenarios: TestScenario[],
     filters: {
@@ -125,9 +116,6 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
     return filtered;
   }
 
-  /**
-   * Evaluate a single scenario
-   */
   async evaluateScenario(scenario: TestScenario): Promise<EvaluationResult> {
     const startTime = Date.now();
 
@@ -143,16 +131,12 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
         this.emit("log", "  Generating code...");
       }
 
-      // Resolve timeout (null = no timeout, undefined = use defaults)
       let timeout: number | null;
       if (scenario.timeout !== undefined) {
-        // Scenario explicitly sets timeout (could be number or null)
         timeout = scenario.timeout;
       } else if (this.options.defaultTimeout !== undefined) {
-        // Config sets default timeout (could be number or null)
         timeout = this.options.defaultTimeout;
       } else {
-        // Built-in default: 2 minutes
         timeout = 120000;
       }
 
