@@ -76,9 +76,9 @@ export class LLMJudgeValidator implements CodeValidator {
   private apiToken: string | undefined;
   private defaultModel: string;
 
-  constructor(workspaceRoot?: string, model: string = "openai/gpt-4.1") {
+  constructor(workspaceRoot?: string, model: string = "openai/gpt-5") {
     this.workspaceRoot = resolveWorkspaceRoot(workspaceRoot);
-    this.apiToken = getGitHubToken(); // Auto-detect from env or GitHub CLI
+    this.apiToken = getGitHubToken();
     this.defaultModel = model;
   }
 
@@ -221,7 +221,7 @@ Be strict but fair in your evaluation.`;
           { role: "system", content: judgeSystemPrompt },
           { role: "user", content: prompt },
         ],
-        temperature: 0,
+        max_completion_tokens: 1000,
         response_format: { type: "json_object" },
       }),
     });

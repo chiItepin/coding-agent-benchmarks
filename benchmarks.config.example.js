@@ -8,7 +8,7 @@ module.exports = {
   defaultAdapter: 'copilot',
 
   // Default LLM model for judge
-  defaultModel: 'openai/gpt-4.1',
+  defaultModel: 'openai/gpt-5',
 
   // Default timeout for code generation (in milliseconds)
   // Individual scenarios can override this
@@ -109,7 +109,7 @@ Return JSON: {"passed": boolean, "score": 0-1, "reasoning": "explanation", "viol
         },
         llmJudge: {
           enabled: true,
-          model: 'openai/gpt-4.1',
+          model: 'openai/gpt-5',
           judgmentPrompt: `Evaluate the API client:
 1. Does it have proper error handling?
 2. Does it implement retries or timeout?

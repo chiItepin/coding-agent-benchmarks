@@ -5,7 +5,11 @@ Open-source framework for evaluating AI coding assistants (like GitHub Copilot C
 
 ![WhatsApp Image 2026-01-23 at 9 04 49 AM](https://github.com/user-attachments/assets/3544d04f-37a5-47b0-a013-669c6015d26f)
 
+*Figure 1: Evaluation workflow - prompt → generate → validate → score*
+
 ![WhatsApp Image 2026-01-24 at 1 58 31 PM](https://github.com/user-attachments/assets/f93ea3e0-74f8-4789-ab43-97245acc91b6)
+
+*Figure 2: Example terminal output showing scenario evaluation results*
 
 
 ## Features
@@ -135,7 +139,7 @@ module.exports = {
   defaultAdapter: 'copilot',
 
   // Default LLM model for judge
-  defaultModel: 'openai/gpt-4.1',
+  defaultModel: 'openai/gpt-5',
 
   // Default timeout for code generation (milliseconds)
   // Individual scenarios can override this
@@ -172,33 +176,15 @@ module.exports = {
       id: 'react-no-inline-styles',
       category: 'react',
       severity: 'major',
-      tags: ['react', 'styling', 'best-practices'],
       description: 'Forbid inline style objects in React components',
-      prompt: 'Create a React functional component called Button that accepts a "label" prop and renders a styled button. Use CSS classes instead of inline styles.',
       validationStrategy: {
         patterns: {
-          forbiddenPatterns: [/style\s*=\s*\{\{/, /style\s*=\s*\{[^}]*\}/],
+          forbiddenPatterns: [/style\s*=\s*\{\{/],
           requiredPatterns: [/className/],
         },
       },
     },
-    {
-      id: 'async-error-handling',
-      category: 'general',
-      severity: 'critical',
-      tags: ['async', 'error-handling', 'robustness'],
-      description: 'Ensure async functions have proper error handling',
-      prompt: 'Create an async function called fetchUserData that takes a userId parameter, makes an HTTP request to fetch user data, and returns the user object. Handle errors appropriately.',
-      validationStrategy: {
-        patterns: {
-          requiredPatterns: [/async\s+function\s+fetchUserData|const\s+fetchUserData.*async/, /try|catch|\.catch\(/],
-        },
-        llmJudge: {
-          enabled: true,
-          judgmentPrompt: 'Evaluate the error handling in this async function. Does it use try/catch or .catch()? Are errors logged or re-thrown appropriately?',
-        },
-      },
-    },
+    // Add more scenarios...
   ],
 };
 ```
@@ -210,29 +196,6 @@ You can configure timeouts at three levels (in order of precedence):
 1. **Per-scenario timeout**: Set `timeout` on individual scenarios (highest priority)
 2. **Global default**: Set `defaultTimeout` in your config file
 3. **Built-in default**: 120000ms (2 minutes) if nothing else is specified
-
-```javascript
-// In benchmarks.config.js
-module.exports = {
-  // Global default applies to all scenarios
-  defaultTimeout: 180000, // 3 minutes
-
-  scenarios: [
-    {
-      id: 'quick-check',
-      prompt: '...',
-      timeout: 60000, // Override: 1 minute for this scenario
-      // ...
-    },
-    {
-      id: 'complex-task',
-      prompt: '...',
-      // Will use defaultTimeout (3 minutes)
-      // ...
-    },
-  ],
-};
-```
 
 **Why configure timeouts?**
 - Complex code generation tasks may need more time
@@ -271,133 +234,73 @@ validationStrategy: {
 
 ### LLM-as-Judge
 
-Semantic evaluation using AI:
+Semantic evaluation using AI (requires `GITHUB_TOKEN`):
 
 ```javascript
 validationStrategy: {
   llmJudge: {
     enabled: true,
-    model: 'openai/gpt-4.1', // or 'gpt-4o'
+    model: 'openai/gpt-5',
     judgmentPrompt: `Evaluate if the code follows best practices...`,
   },
 }
 ```
 
-The LLM judge requires a `GITHUB_TOKEN` environment variable with access to GitHub Models API.
-
 ### ESLint Integration
 
 ![WhatsApp Image 2026-01-24 at 2 09 11 PM](https://github.com/user-attachments/assets/12af93e8-ed7c-4153-a183-20601a925965)
 
+*Figure 3: ESLint validator detecting code quality issues in generated code*
 
 Run ESLint on generated code:
 
 ```javascript
 validationStrategy: {
-  eslint: {
-    enabled: true,
-    configPath: '.eslintrc.js', // optional
-  },
+  eslint: { enabled: true, configPath: '.eslintrc.js' },
 }
 ```
 
 ## Scoring System
 
-The scoring system operates at three levels: per-validator scoring, per-scenario scoring, and summary scoring.
-
 ### Per-Validator Scoring
 
-Each validator (Pattern, LLM Judge, ESLint) independently evaluates the generated code and produces a score from 0.0 to 1.0:
+Each validator independently evaluates generated code and produces a score from 0.0 to 1.0:
 
-#### Pattern Validator
-
-Uses exponential decay based on weighted violations:
-
-```
-score = e^(-totalWeight)
-```
-
-Where `totalWeight` is the sum of violation weights:
-- **Critical violations**: 1.0 weight each
-- **Major violations**: 0.7 weight each
-- **Minor violations**: 0.3 weight each
-
-**Examples**:
-- 0 violations → score = 1.0 (perfect)
-- 1 critical violation → score ≈ 0.37
-- 1 major violation → score ≈ 0.50
-- 2 minor violations → score ≈ 0.55
-
-#### LLM Judge Validator
-
-The LLM (GPT-4 or other model) evaluates the code semantically and returns:
-- An `overallScore` from 0.0 to 1.0
-- A list of violations with explanations
-- Passed if: score ≥ 0.7 AND no violations
-
-The LLM judge provides semantic understanding beyond pattern matching, evaluating whether the code actually solves the problem correctly and follows best practices.
-
-#### ESLint Validator
-
-This validator runs ESLint on the generated code and scores based on the number and severity of linting violations. Note that ESLint must be installed and configured in your project for this validator to work. If you don't have ESLint set up globally, disable this validator or provide a custom validator.
-
-Uses exponential decay with a dampening factor:
-
-```
-score = e^(-totalWeight / 2)
-```
-
-ESLint violations are mapped to severity:
-- ESLint error (severity 2) → **Major** violation (0.7 weight)
-- ESLint warning (severity 1) → **Minor** violation (0.3 weight)
-
-The `/2` dampening factor makes ESLint less punitive since projects often have many minor linting issues.
+| Validator | Scoring Method | Notes |
+|-----------|----------------|-------|
+| **Pattern** | Uses exponential decay based on weighted violations | Critical: 1.0 weight, Major: 0.7 weight, Minor: 0.3 weight |
+| **LLM Judge** | AI evaluates semantically, returns 0.0-1.0 score | Passes if score ≥ 0.7 AND no violations |
+| **ESLint** | Exponential decay with dampening factor (÷2) | ESLint errors → Major (0.7), warnings → Minor (0.3) |
 
 ### Per-Scenario Scoring
 
-Each scenario receives an **overall score** calculated as:
+Each scenario receives an **overall score** = **average of all active validator scores**
 
-```
-overallScore = average of all active validator scores
-```
-
-**Active validators** are those that:
-- Are configured in the scenario's `validationStrategy`
-- Successfully ran (did not return score = -1)
+**Active validators** are those configured in `validationStrategy` that successfully ran (score ≠ -1).
 
 **Pass/Fail Criteria**:
 - ✅ **PASS**: `overallScore ≥ 0.8` AND `violations.length === 0`
 - ❌ **FAIL**: `overallScore < 0.8` OR `violations.length > 0`
 - ⚠️ **SKIP**: An error occurred during evaluation (timeout, adapter failure, etc.)
 
-**Example**: If Pattern validator returns 0.9, LLM Judge returns 0.8, and ESLint is skipped:
-```
-overallScore = (0.9 + 0.8) / 2 = 0.85
-```
+**Example**: Pattern (0.9) + LLM Judge (0.8) + ESLint (skipped) → `overallScore = (0.9 + 0.8) / 2 = 0.85`
 
 ### Summary Scoring
 
-After evaluating all scenarios, the framework calculates summary statistics:
+After evaluating all scenarios, the framework calculates:
 
 ```javascript
 {
-  total: 10,              // Total number of scenarios
-  passed: 7,              // Scenarios with overallScore ≥ 0.8 and no violations
-  failed: 2,              // Scenarios evaluated but didn't pass
-  skipped: 1,             // Scenarios that encountered errors
-  averageScore: 0.78,     // Average of all scenario overallScores
+  total: 10,              // Total scenarios
+  passed: 7,              // overallScore ≥ 0.8 and no violations
+  failed: 2,              // Evaluated but didn't pass
+  skipped: 1,             // Encountered errors
+  averageScore: 0.78,     // Average of all scenario scores
   totalViolations: 8      // Sum of violations across all scenarios
 }
 ```
 
-**Average Score Calculation**:
-```
-averageScore = (sum of all scenario scores) / total scenarios
-```
-
-This includes scores from failed scenarios, providing an overall quality metric across your entire test suite.
-
-**Transparency**: When baselines are saved, the per-validator breakdown is included in the baseline file, allowing you to trace exactly which validator contributed what score. See [Baseline File Format](#baseline-file-format) for details.
+**Transparency**: Baselines include per-validator breakdowns. See [Baseline File Format](#baseline-file-format) for details.
 
 ### Score Interpretation
 
@@ -415,11 +318,6 @@ When baseline tracking is enabled, you'll see delta metrics:
 ```bash
 ✓ [1/3] typescript-no-any PASS (score: 0.95)
     ↑ +18.5% improvement from baseline
-```
-
-The percentage is calculated as:
-```
-percentage = (currentScore - baselineScore) / baselineScore * 100
 ```
 
 ## Baseline Tracking
@@ -449,42 +347,21 @@ When `compareBaseline` is enabled, the report will show score deltas and whether
 
 ### Baseline File Format
 
-Each baseline file contains complete transparency into how the score was calculated:
+Path: `.benchmarks/baselines/{adapter}/{model}/{scenario-id}.json`
+
+Each baseline file provides complete score traceability:
 
 ```json
 {
   "scenarioId": "typescript-no-any",
   "score": 0.85,
   "violations": [
-    {
-      "type": "pattern",
-      "message": "Forbidden pattern found: :\\s*any\\b",
-      "file": "src/types.ts",
-      "line": 12,
-      "severity": "critical",
-      "details": "Matched: \"metadata: any\""
-    }
+    { "type": "pattern", "message": "Forbidden pattern found: :\\s*any\\b", "file": "src/types.ts", ... }
   ],
   "validationResults": [
-    {
-      "passed": false,
-      "score": 0.37,
-      "violations": [...],
-      "validatorType": "pattern"
-    },
-    {
-      "passed": true,
-      "score": 1.0,
-      "violations": [],
-      "validatorType": "llm-judge"
-    },
-    {
-      "passed": true,
-      "score": -1,
-      "violations": [],
-      "validatorType": "eslint",
-      "error": "ESLint not found"
-    }
+    { "passed": false, "score": 0.37, "validatorType": "pattern", "violations": [...] },
+    { "passed": true, "score": 1.0, "validatorType": "llm-judge", "violations": [] },
+    { "passed": true, "score": -1, "validatorType": "eslint", "error": "ESLint not found" }
   ],
   "timestamp": "2026-01-23T22:28:32.216Z",
   "adapter": "copilot",
@@ -493,15 +370,11 @@ Each baseline file contains complete transparency into how the score was calcula
 ```
 
 **Key fields**:
-- `score`: Overall scenario score (average of active validators)
-- `violations`: All violations from all validators combined
-- `validationResults`: Per-validator breakdown showing:
-  - Individual validator score
-  - Whether that validator passed
-  - Violations specific to that validator
-  - Any errors that occurred (`score: -1` means skipped)
+- `score` - Overall scenario score (average of active validators)
+- `violations` - All violations from all validators combined
+- `validationResults` - Per-validator breakdown (score, passed, violations, errors)
 
-**Score Traceability**: With this format, you can always trace the overall score back to individual validator scores. For example, if you see `score: 0.067`, you can look at `validationResults` to see which validators contributed what scores (e.g., Pattern: 0.135, LLM Judge: 0.00).
+**Traceability**: You can always trace the overall score back to individual validator scores (e.g., `score: 0.067` → check `validationResults` for Pattern: 0.135, LLM Judge: 0.00).
 
 ## CLI Commands
 
@@ -509,24 +382,26 @@ Each baseline file contains complete transparency into how the score was calcula
 
 Run benchmark evaluations.
 
-**Options:**
-- `--scenario <pattern>`: Filter by scenario ID (supports wildcards like `typescript-*`)
-- `--category <categories>`: Filter by category (comma-separated)
-- `--tag <tags>`: Filter by tags (comma-separated)
-- `--adapter <type>`: Adapter to use (`copilot` or `claude-code`)
-- `--model <model>`: LLM model for judge (default: `openai/gpt-4.1`)
-- `--threshold <number>`: Minimum passing score (default: `0.8`)
-- `--verbose`: Show detailed output
-- `--output <file>`: Export JSON report
-- `--workspace-root <path>`: Workspace root directory
+| Option | Description | Default/Example |
+|--------|-------------|-----------------|
+| `--scenario <pattern>` | Filter by scenario ID (supports wildcards) | `typescript-*` |
+| `--category <categories>` | Filter by category (comma-separated) | `typescript,react` |
+| `--tag <tags>` | Filter by tags (comma-separated) | `safety,types` |
+| `--adapter <type>` | Adapter to use | `copilot` or `claude-code` |
+| `--model <model>` | LLM model for judge | `openai/gpt-5` |
+| `--threshold <number>` | Minimum passing score | `0.8` |
+| `--verbose` | Show detailed output | - |
+| `--output <file>` | Export JSON report | `report.json` |
+| `--workspace-root <path>` | Workspace root directory | Current directory |
 
 ### `list`
 
 List available test scenarios.
 
-**Options:**
-- `--category <categories>`: Filter by category
-- `--tag <tags>`: Filter by tags
+| Option | Description |
+|--------|-------------|
+| `--category <categories>` | Filter by category (comma-separated) |
+| `--tag <tags>` | Filter by tags (comma-separated) |
 
 ### `check`
 
@@ -536,8 +411,9 @@ Check if coding agent CLIs are available.
 
 Test LLM judge with a custom prompt (for debugging).
 
-**Options:**
-- `--model <model>`: LLM model to use
+| Option | Description |
+|--------|-------------|
+| `--model <model>` | LLM model to use |
 
 ## Understanding Output
 
@@ -586,26 +462,15 @@ import { Evaluator, loadConfig } from 'coding-agent-benchmarks';
 async function runEvaluation() {
   const { config, scenarios } = await loadConfig();
 
-  // Create evaluator
   const evaluator = new Evaluator({
     adapter: 'copilot',
-    model: 'openai/gpt-4.1',
+    model: 'openai/gpt-5',
     verbose: true,
     saveBaseline: config.saveBaseline,
     compareBaseline: config.compareBaseline,
   });
 
-  // Check adapter availability
-  const available = await evaluator.checkAdapterAvailability();
-  if (!available) {
-    throw new Error('Adapter not available');
-  }
-
-  // Run evaluation
   const report = await evaluator.evaluate(scenarios);
-
-  console.log(`Passed: ${report.summary.passed}/${report.summary.total}`);
-  console.log(`Average score: ${report.summary.averageScore.toFixed(2)}`);
 }
 
 runEvaluation();
@@ -616,106 +481,62 @@ runEvaluation();
 Implement the `CodeValidator` interface:
 
 ```typescript
-import { CodeValidator, ValidationResult, TestScenario } from 'coding-agent-benchmarks';
+import { CodeValidator, ValidationResult } from 'coding-agent-benchmarks';
 
 export class CustomValidator implements CodeValidator {
   public readonly type = 'custom';
 
-  async validate(
-    files: readonly string[],
-    scenario: TestScenario
-  ): Promise<ValidationResult> {
+  async validate(files: readonly string[], scenario: TestScenario): Promise<ValidationResult> {
     // Your validation logic here
-    return {
-      passed: true,
-      score: 1.0,
-      violations: [],
-      validatorType: 'custom',
-    };
+    return { passed: true, score: 1.0, violations: [], validatorType: 'custom' };
   }
 }
 ```
+
+See CONTRIBUTING.md for complete examples.
 
 ## Creating Custom Adapters
 
 Implement the `CodeGenerationAdapter` interface:
 
 ```typescript
-import { CodeGenerationAdapter, AdapterType } from 'coding-agent-benchmarks';
+import { CodeGenerationAdapter } from 'coding-agent-benchmarks';
 
 export class CustomAdapter implements CodeGenerationAdapter {
-  public readonly type: AdapterType = 'copilot'; // or extend the type
+  public readonly type = 'custom-adapter';
 
-  async checkAvailability(): Promise<boolean> {
-    // Check if CLI is available
-    return true;
-  }
-
-  async generate(
-    prompt: string,
-    contextFiles?: readonly string[],
-    timeout?: number
-  ): Promise<string[]> {
-    // Generate code and return changed files
-    return ['path/to/generated/file.ts'];
-  }
+  async checkAvailability(): Promise<boolean> { /* ... */ }
+  async generate(prompt: string, contextFiles?: readonly string[], timeout?: number): Promise<string[]> { /* ... */ }
 }
 ```
 
+See CONTRIBUTING.md for complete examples.
+
 ## GitHub Authentication (for LLM Judge)
 
-LLM-as-judge validation requires GitHub authentication to access GitHub Models API. There are **two easy options** - no OAuth registration needed!
+LLM-as-judge validation requires GitHub authentication to access GitHub Models API. Choose one option:
 
 ### Option 1: Personal Access Token (Recommended)
 
-1. Create token at https://github.com/settings/tokens
-2. Click "Generate new token (classic)"
-3. Give it a name (e.g., "coding-agent-benchmarks")
-4. Select scope: **`models:read`**
-5. Generate and copy the token
-6. Set environment variable:
-   ```bash
-   export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
-   ```
+Create a token at https://github.com/settings/tokens with the **`models:read`** scope, then set it as an environment variable:
+
+```bash
+export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+```
 
 ### Option 2: GitHub CLI (Automatic)
 
-If you have GitHub CLI installed, tokens are auto-detected:
+If GitHub CLI is installed, tokens are auto-detected:
 
 ```bash
-# Install GitHub CLI
-brew install gh          # macOS
-# or download from https://cli.github.com
-
-# Authenticate (one time)
+brew install gh  # or download from https://cli.github.com
 gh auth login
-
 # Token will be used automatically - no GITHUB_TOKEN needed!
 ```
 
-### Check Authentication Status
+### Check Authentication
 
-```bash
-npx coding-agent-benchmarks check
-```
-
-Output:
-```
-Checking adapter availability...
-  GitHub Copilot CLI: ✓ Available
-  Claude Code CLI: ✗ Not found
-
-Checking GitHub authentication...
-  ✓ Using token from GitHub CLI (gh auth token)
-```
-
-## How It Works
-
-1. **Code Generation**: The adapter spawns a coding agent CLI with a prompt
-2. **File Tracking**: Git is used to detect which files were created/modified
-3. **Validation**: Multiple validators check the generated code
-4. **Scoring**: Results are aggregated and compared against thresholds
-5. **Reporting**: Results are displayed in terminal and optionally exported as JSON
+Run `npx coding-agent-benchmarks check` to verify authentication status.
 
 ## Requirements
 

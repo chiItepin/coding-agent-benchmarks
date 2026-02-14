@@ -85,7 +85,7 @@ export interface LLMJudgeValidation {
   judgmentPrompt?: string;
 
   /**
-   * Model to use for judgment (default: openai/gpt-4.1)
+   * Model to use for judgment (default: openai/gpt-5)
    */
   model?: string;
 }
