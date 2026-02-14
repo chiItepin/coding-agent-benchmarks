@@ -1,5 +1,7 @@
 # coding-agent-benchmarks
 
+**[📖 Documentation](https://chiItepin.github.io/coding-agent-benchmarks)** | **[📦 npm](https://www.npmjs.com/package/coding-agent-benchmarks)** | **[⭐ GitHub](https://github.com/chiItepin/coding-agent-benchmarks)**
+
 Open-source framework for evaluating AI coding assistants (like GitHub Copilot CLI or Claude Code) follow your coding standards. Here's the workflow:
 1. You give it a prompt → 2. AI generates code → 3. Library validates → 4. You get a score
 

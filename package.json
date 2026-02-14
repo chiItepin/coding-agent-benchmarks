@@ -41,6 +41,7 @@
   ],
   "author": "chiItepin",
   "license": "MIT",
+  "homepage": "https://chiItepin.github.io/coding-agent-benchmarks",
   "repository": {
     "type": "git",
     "url": "https://github.com/chiItepin/coding-agent-benchmarks.git"
