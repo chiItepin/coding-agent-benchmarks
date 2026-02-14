@@ -69,7 +69,7 @@ program
 
       const evaluator = new Evaluator({
         adapter: options.adapter as AdapterType,
-        model: options.model,
+        model: options.model || config.defaultModel,
         workspaceRoot: options.workspaceRoot,
         defaultTimeout: config.defaultTimeout,
         verbose: options.verbose,
