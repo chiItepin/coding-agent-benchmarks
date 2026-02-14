@@ -43,7 +43,8 @@ program
     "Code generation adapter (copilot or claude-code)",
     "copilot",
   )
-  .option("--model <model>", "LLM model for judge (default: openai/gpt-5-mini)")
+  .option("--model <model>", "Model for the coding agent adapter")
+  .option("--judge-model <model>", "LLM model for judge validation (default: openai/gpt-5-mini)")
   .option("--threshold <number>", "Minimum passing score", "0.8")
   .option("--verbose", "Show detailed output")
   .option("--output <file>", "Export JSON report to file")
@@ -70,6 +71,7 @@ program
       const evaluator = new Evaluator({
         adapter: options.adapter as AdapterType,
         model: options.model || config.defaultModel,
+        judgeModel: options.judgeModel || config.defaultJudgeModel,
         workspaceRoot: options.workspaceRoot,
         defaultTimeout: config.defaultTimeout,
         verbose: options.verbose,
@@ -248,6 +250,7 @@ program
   .command("test-llm")
   .description("Test LLM judge with a custom prompt")
   .option("--model <model>", "LLM model to use (default: openai/gpt-5-mini)")
+  .option("--judge-model <model>", "Alias for --model")
   .action(async (options) => {
     try {
       console.log("Testing LLM judge...\n");
@@ -262,8 +265,9 @@ program
       process.stdin.on("end", async () => {
         const prompt = chunks.join("");
 
-        const validator = new LLMJudgeValidator(undefined, options.model);
-        const result = await validator.testJudge(prompt, options.model);
+        const judgeModel = options.judgeModel || options.model;
+        const validator = new LLMJudgeValidator(undefined, judgeModel);
+        const result = await validator.testJudge(prompt, judgeModel);
 
         console.log("\nLLM Response:\n");
         console.log(result);

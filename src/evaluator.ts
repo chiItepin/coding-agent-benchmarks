@@ -40,6 +40,7 @@ export type EvaluatorEvents = {
 export interface EvaluatorOptions {
   adapter: AdapterType;
   model?: string;
+  judgeModel?: string;
   workspaceRoot?: string;
   defaultTimeout?: number | null;
   verbose?: boolean;
@@ -170,7 +171,7 @@ export class Evaluator extends TypedEventEmitter<EvaluatorEvents> {
 
       const llmValidator = new LLMJudgeValidator(
         this.workspaceRoot,
-        this.options.model,
+        this.options.judgeModel,
       );
       const llmResult = await llmValidator.validate(generatedFiles, scenario);
       validationResults.push(llmResult);

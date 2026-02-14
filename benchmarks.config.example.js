@@ -7,8 +7,11 @@ module.exports = {
   // Default adapter to use
   defaultAdapter: 'copilot',
 
-  // Default LLM model for judge
-  defaultModel: 'openai/gpt-5-mini',
+  // Default model for the coding agent adapter
+  defaultModel: 'claude-sonnet-4.5',
+
+  // Default LLM model for judge validation
+  defaultJudgeModel: 'openai/gpt-5-mini',
 
   // Default timeout for code generation (in milliseconds)
   // Individual scenarios can override this

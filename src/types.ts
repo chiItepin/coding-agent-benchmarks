@@ -420,9 +420,14 @@ export interface BenchmarkConfig {
   defaultAdapter?: AdapterType;
 
   /**
-   * Default LLM model for judge
+   * Default model for the coding agent adapter
    */
   defaultModel?: string;
+
+  /**
+   * Default LLM model for judge validation (default: openai/gpt-5-mini)
+   */
+  defaultJudgeModel?: string;
 
   /**
    * Workspace root directory (auto-detected if not specified)
