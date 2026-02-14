@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#grad)"/>
+  
+  <!-- Chart bars representing benchmarks -->
+  <rect x="20" y="55" width="12" height="25" fill="white" opacity="0.9" rx="2"/>
+  <rect x="37" y="40" width="12" height="40" fill="white" opacity="0.9" rx="2"/>
+  <rect x="54" y="30" width="12" height="50" fill="white" opacity="0.9" rx="2"/>
+  <rect x="71" y="45" width="12" height="35" fill="white" opacity="0.9" rx="2"/>
+  
+  <!-- Checkmark -->
+  <path d="M 30 20 L 40 30 L 70 10" stroke="white" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
