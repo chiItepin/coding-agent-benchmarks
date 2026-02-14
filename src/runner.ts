@@ -43,7 +43,7 @@ program
     "Code generation adapter (copilot or claude-code)",
     "copilot",
   )
-  .option("--model <model>", "LLM model for judge (default: openai/gpt-5)")
+  .option("--model <model>", "LLM model for judge (default: openai/gpt-5-mini)")
   .option("--threshold <number>", "Minimum passing score", "0.8")
   .option("--verbose", "Show detailed output")
   .option("--output <file>", "Export JSON report to file")
@@ -247,7 +247,7 @@ program
 program
   .command("test-llm")
   .description("Test LLM judge with a custom prompt")
-  .option("--model <model>", "LLM model to use (default: openai/gpt-5)")
+  .option("--model <model>", "LLM model to use (default: openai/gpt-5-mini)")
   .action(async (options) => {
     try {
       console.log("Testing LLM judge...\n");

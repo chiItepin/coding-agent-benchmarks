@@ -141,7 +141,7 @@ module.exports = {
   defaultAdapter: 'copilot',
 
   // Default LLM model for judge
-  defaultModel: 'openai/gpt-5',
+  defaultModel: 'openai/gpt-5-mini',
 
   // Default timeout for code generation (milliseconds)
   // Individual scenarios can override this
@@ -242,7 +242,7 @@ Semantic evaluation using AI (requires `GITHUB_TOKEN`):
 validationStrategy: {
   llmJudge: {
     enabled: true,
-    model: 'openai/gpt-5',
+    model: 'openai/gpt-5-mini',
     judgmentPrompt: `Evaluate if the code follows best practices...`,
   },
 }
@@ -390,7 +390,7 @@ Run benchmark evaluations.
 | `--category <categories>` | Filter by category (comma-separated) | `typescript,react` |
 | `--tag <tags>` | Filter by tags (comma-separated) | `safety,types` |
 | `--adapter <type>` | Adapter to use | `copilot` or `claude-code` |
-| `--model <model>` | LLM model for judge | `openai/gpt-5` |
+| `--model <model>` | LLM model for judge | `openai/gpt-5-mini` |
 | `--threshold <number>` | Minimum passing score | `0.8` |
 | `--verbose` | Show detailed output | - |
 | `--output <file>` | Export JSON report | `report.json` |
@@ -466,7 +466,7 @@ async function runEvaluation() {
 
   const evaluator = new Evaluator({
     adapter: 'copilot',
-    model: 'openai/gpt-5',
+    model: 'openai/gpt-5-mini',
     verbose: true,
     saveBaseline: config.saveBaseline,
     compareBaseline: config.compareBaseline,
