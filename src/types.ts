@@ -85,7 +85,7 @@ export interface LLMJudgeValidation {
   judgmentPrompt?: string;
 
   /**
-   * Model to use for judgment (default: openai/gpt-5-mini)
+   * Model to use for judgment (default: openai/gpt-5)
    */
   model?: string;
 }
@@ -425,7 +425,7 @@ export interface BenchmarkConfig {
   defaultModel?: string;
 
   /**
-   * Default LLM model for judge validation (default: openai/gpt-5-mini)
+   * Default LLM model for judge validation (default: openai/gpt-5)
    */
   defaultJudgeModel?: string;
 

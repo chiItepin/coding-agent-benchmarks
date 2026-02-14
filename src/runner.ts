@@ -44,7 +44,7 @@ program
     "copilot",
   )
   .option("--model <model>", "Model for the coding agent adapter")
-  .option("--judge-model <model>", "LLM model for judge validation (default: openai/gpt-5-mini)")
+  .option("--judge-model <model>", "LLM model for judge validation (default: openai/gpt-5)")
   .option("--threshold <number>", "Minimum passing score", "0.8")
   .option("--verbose", "Show detailed output")
   .option("--output <file>", "Export JSON report to file")
@@ -249,7 +249,7 @@ program
 program
   .command("test-llm")
   .description("Test LLM judge with a custom prompt")
-  .option("--model <model>", "LLM model to use (default: openai/gpt-5-mini)")
+  .option("--model <model>", "LLM model to use (default: openai/gpt-5)")
   .option("--judge-model <model>", "Alias for --model")
   .action(async (options) => {
     try {

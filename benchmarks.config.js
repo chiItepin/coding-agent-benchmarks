@@ -3,7 +3,7 @@ module.exports = {
   defaultAdapter: 'copilot',
 
   // Default LLM model for judge validation
-  defaultJudgeModel: 'openai/gpt-5-mini',
+  defaultJudgeModel: 'openai/gpt-5',
 
   // Default timeout for code generation (milliseconds)
   // Individual scenarios can override this

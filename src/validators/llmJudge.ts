@@ -76,7 +76,7 @@ export class LLMJudgeValidator implements CodeValidator {
   private apiToken: string | undefined;
   private defaultModel: string;
 
-  constructor(workspaceRoot?: string, model: string = "openai/gpt-5-mini") {
+  constructor(workspaceRoot?: string, model: string = "openai/gpt-5") {
     this.workspaceRoot = resolveWorkspaceRoot(workspaceRoot);
     this.apiToken = getGitHubToken();
     this.defaultModel = model;

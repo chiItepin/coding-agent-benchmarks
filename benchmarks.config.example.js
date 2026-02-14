@@ -11,7 +11,7 @@ module.exports = {
   defaultModel: 'claude-sonnet-4.5',
 
   // Default LLM model for judge validation
-  defaultJudgeModel: 'openai/gpt-5-mini',
+  defaultJudgeModel: 'openai/gpt-5',
 
   // Default timeout for code generation (in milliseconds)
   // Individual scenarios can override this
@@ -112,7 +112,7 @@ Return JSON: {"passed": boolean, "score": 0-1, "reasoning": "explanation", "viol
         },
         llmJudge: {
           enabled: true,
-          model: 'openai/gpt-5-mini',
+          model: 'openai/gpt-5',
           judgmentPrompt: `Evaluate the API client:
 1. Does it have proper error handling?
 2. Does it implement retries or timeout?
