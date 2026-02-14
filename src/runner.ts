@@ -12,15 +12,19 @@ import { checkGitHubAuth } from "./utils/githubAuth";
 import { processCLIError } from "./utils/errorHandler";
 import { ProgressReporter } from "./reporter";
 import { getChangedFilesExcluding } from "./utils/gitUtils";
+import { checkForUpdate, getCurrentVersion } from "./utils/updateChecker";
+import { notifyUpdate } from "./utils/updateNotifier";
 
 const program = new Command();
+
+const updateCheckPromise = checkForUpdate();
 
 program
   .name("coding-agent-benchmarks")
   .description(
     "Evaluate coding agents against coding standards and best practices",
   )
-  .version("0.1.0");
+  .version(getCurrentVersion());
 
 /**
  * Evaluate command
@@ -270,5 +274,9 @@ program
     }
   });
 
-// Parse arguments
-program.parse(process.argv);
+program.parseAsync(process.argv).then(async () => {
+  const updateInfo = await updateCheckPromise;
+  if (updateInfo) {
+    notifyUpdate(updateInfo);
+  }
+});

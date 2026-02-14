@@ -11,3 +11,5 @@ export { TypedEventEmitter } from "./utils/TypedEventEmitter";
 export * from "./utils/gitUtils";
 export * from "./utils/workspaceUtils";
 export * from "./utils/githubAuth";
+export * from "./utils/updateChecker";
+export { notifyUpdate } from "./utils/updateNotifier";
