@@ -25,11 +25,15 @@ body {
 /* Hero Section */
 .hero {
     position: relative;
-    min-height: 100vh;
+    /* Reduced min-height to fix excessive spacing */
+    min-height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    /* Added subtle pattern to fix "floating in void" */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
 }
 
 .hero-gradient {
@@ -52,26 +56,40 @@ body {
 }
 
 .hero-title {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    font-weight: 700;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.02em;
+    /* Increased size significantly for visual impact */
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 2rem;
+    letter-spacing: -0.03em;
+    /* Add text shadow for depth */
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    /* Enhanced gradient with more vibrant colors */
+    background: linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #f87171 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    /* Add subtle animation */
+    background-size: 200% 200%;
+    animation: gradient-flow 5s ease infinite;
+}
+
+@keyframes gradient-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .hero-subtitle {
-    font-size: clamp(1.1rem, 2vw, 1.4rem);
-    color: #a1a1aa;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    color: #d4d4d8; /* Lighter text for better contrast */
     max-width: 700px;
-    margin: 0 auto 2.5rem;
+    margin: 0 auto 3rem;
     line-height: 1.6;
+    font-weight: 400;
 }
 
 .cta-buttons {
@@ -82,61 +100,72 @@ body {
 }
 
 .btn {
-    padding: 0.875rem 2rem;
-    border-radius: 0.5rem;
-    font-size: 1rem;
+    padding: 1rem 2.5rem; /* Larger buttons */
+    border-radius: 2rem; /* Pill shape for modern look */
+    font-size: 1.1rem;
     font-weight: 600;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     border: none;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-primary {
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     color: white;
+    box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px -5px rgba(139, 92, 246, 0.6);
+    filter: brightness(1.1);
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     color: #e4e4e7;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-3px);
 }
 
 /* How It Works Section */
 .how-it-works {
-    padding: 8rem 0;
+    /* Reduced padding drastically */
+    padding: 4rem 0;
     background: linear-gradient(180deg, #09090b 0%, #18181b 100%);
 }
 
 .section-title {
     font-size: clamp(2rem, 4vw, 3rem);
     text-align: center;
-    margin-bottom: 4rem;
+    /* Reduced margin-bottom */
+    margin-bottom: 2.5rem;
     font-weight: 700;
     letter-spacing: -0.02em;
 }
 
 .workflow-diagram {
     max-width: 900px;
-    margin: 0 auto 4rem;
-    padding: 2rem;
+    /* Reduced margin-bottom */
+    margin: 0 auto 2.5rem;
+    padding: 1.5rem;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1rem;
+    /* Add subtle glow */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
 }
 
 .workflow-diagram img {
@@ -149,26 +178,41 @@ body {
 .steps {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    align-items: center;
+    /* Reduced gap */
+    gap: 1rem;
+    align-items: flex-start; /* Better alignment */
+    /* Add subtle connector line */
+    position: relative;
 }
 
 .step {
     text-align: center;
-    padding: 2rem 1rem;
+    padding: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .step-number {
-    width: 60px;
-    height: 60px;
+    width: 50px; /* Slightly smaller */
+    height: 50px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    background: #09090b; /* Dark bg */
+    border: 2px solid #8b5cf6; /* Border instead of solid fill */
+    color: #8b5cf6;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1.5rem;
-    font-size: 1.5rem;
+    margin: 0 auto 1rem;
+    font-size: 1.25rem;
     font-weight: 700;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.step:hover .step-number {
+    background: #8b5cf6;
+    color: white;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
 }
 
 .step h3 {
@@ -201,7 +245,8 @@ body {
 
 /* Features Section */
 .features {
-    padding: 8rem 0;
+    /* Reduced padding drastically */
+    padding: 4rem 0;
     background: #09090b;
 }
 
@@ -212,17 +257,37 @@ body {
 }
 
 .feature-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 1rem;
+    border-radius: 1.5rem;
     padding: 2.5rem;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255, 255, 255, 0.06), transparent 40%);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.feature-card:hover::before {
+    opacity: 1;
 }
 
 .feature-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(139, 92, 246, 0.3);
-    transform: translateY(-4px);
+    border-color: rgba(139, 92, 246, 0.5);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
 }
 
 .feature-icon {
@@ -242,10 +307,18 @@ body {
 }
 
 .feature-screenshot {
-    margin-top: 1.5rem;
-    border-radius: 0.5rem;
-    overflow: hidden;
+    margin-top: 2rem;
+    border-radius: 1rem;
+    /* Fix small screenshot issue */
+    width: 110%; /* Slight bleed for dynamic look */
+    margin-left: -5%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.4s ease;
+}
+
+.feature-card:hover .feature-screenshot {
+    transform: scale(1.02);
 }
 
 .feature-screenshot img {
@@ -256,7 +329,8 @@ body {
 
 /* Code Example Section */
 .code-example {
-    padding: 8rem 0;
+    /* Reduced padding drastically */
+    padding: 4rem 0;
     background: linear-gradient(180deg, #09090b 0%, #18181b 100%);
 }
 
@@ -300,7 +374,8 @@ body {
 
 /* Installation Section */
 .installation {
-    padding: 8rem 0;
+    /* Reduced padding drastically */
+    padding: 4rem 0;
     background: #09090b;
 }
 
