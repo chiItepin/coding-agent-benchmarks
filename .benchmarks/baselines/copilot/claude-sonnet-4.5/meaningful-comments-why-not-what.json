@@ -1,6 +1,6 @@
 {
   "scenarioId": "meaningful-comments-why-not-what",
-  "score": 1,
+  "score": 0,
   "violations": [],
   "validationResults": [
     {
@@ -10,10 +10,11 @@
       "validatorType": "pattern"
     },
     {
-      "passed": true,
-      "score": 1,
+      "passed": false,
+      "score": 0,
       "violations": [],
-      "validatorType": "llm-judge"
+      "validatorType": "llm-judge",
+      "error": "LLM judge failed: Error: No content in LLM response"
     },
     {
       "passed": true,
@@ -22,7 +23,7 @@
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-02-08T21:14:04.928Z",
+  "timestamp": "2026-02-14T21:00:54.805Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }

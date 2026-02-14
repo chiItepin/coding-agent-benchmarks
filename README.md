@@ -140,7 +140,7 @@ module.exports = {
   // Default adapter to use
   defaultAdapter: 'copilot',
 
-  // Default LLM model for judge
+  // Default LLM model for judge validation
   defaultModel: 'openai/gpt-5-mini',
 
   // Default timeout for code generation (milliseconds)
@@ -390,7 +390,8 @@ Run benchmark evaluations.
 | `--category <categories>` | Filter by category (comma-separated) | `typescript,react` |
 | `--tag <tags>` | Filter by tags (comma-separated) | `safety,types` |
 | `--adapter <type>` | Adapter to use | `copilot` or `claude-code` |
-| `--model <model>` | LLM model for judge | `openai/gpt-5-mini` |
+| `--model <model>` | Model for the coding agent adapter | - |
+| `--judge-model <model>` | LLM model for judge validation | `openai/gpt-5-mini` |
 | `--threshold <number>` | Minimum passing score | `0.8` |
 | `--verbose` | Show detailed output | - |
 | `--output <file>` | Export JSON report | `report.json` |
@@ -416,6 +417,7 @@ Test LLM judge with a custom prompt (for debugging).
 | Option | Description |
 |--------|-------------|
 | `--model <model>` | LLM model to use |
+| `--judge-model <model>` | Alias for --model |
 
 ## Understanding Output
 
@@ -466,7 +468,7 @@ async function runEvaluation() {
 
   const evaluator = new Evaluator({
     adapter: 'copilot',
-    model: 'openai/gpt-5-mini',
+    judgeModel: 'openai/gpt-5-mini',
     verbose: true,
     saveBaseline: config.saveBaseline,
     compareBaseline: config.compareBaseline,
@@ -539,6 +541,8 @@ gh auth login
 ### Check Authentication
 
 Run `npx coding-agent-benchmarks check` to verify authentication status.
+
+> **Note:** GitHub Models API is rate limited on the free tier (e.g., 15 req/min, 150 req/day for low-tier models). If you hit rate limits running many scenarios, consider [opting in to paid usage](https://docs.github.com/en/billing/managing-billing-for-your-products/about-billing-for-github-models) for higher limits.
 
 ## Requirements
 
