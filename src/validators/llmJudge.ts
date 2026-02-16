@@ -223,6 +223,14 @@ Be strict but fair in your evaluation.`;
       }),
     });
 
+    if (response.status === 401) {
+      throw new Error("Unauthorized: Invalid GITHUB_TOKEN");
+    }
+
+    if (response.status === 429) {
+      throw new Error("Rate limit exceeded: Too many requests to LLM API");
+    }
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(
