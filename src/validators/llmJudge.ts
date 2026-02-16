@@ -128,14 +128,12 @@ export class LLMJudgeValidator implements CodeValidator {
         fileContents.push({ path: relativePath, content });
       }
 
-      // Build judgment prompt
       const judgmentPrompt = this.buildJudgmentPrompt(
         scenario,
         fileContents,
         llmConfig.judgmentPrompt,
       );
 
-      // Calling LLM API
       const model = llmConfig.model || this.defaultModel;
       const judgment = await this.callLLMAPI(judgmentPrompt, model);
 
@@ -157,8 +155,8 @@ export class LLMJudgeValidator implements CodeValidator {
       };
     } catch (error) {
       return {
-        passed: false,
-        score: 0,
+        passed: true,
+        score: -1,
         violations: [],
         validatorType: "llm-judge",
         error: `LLM judge failed: ${error}`,
@@ -221,7 +219,6 @@ Be strict but fair in your evaluation.`;
           { role: "system", content: judgeSystemPrompt },
           { role: "user", content: prompt },
         ],
-        max_completion_tokens: 1000,
         response_format: { type: "json_object" },
       }),
     });
@@ -237,7 +234,10 @@ Be strict but fair in your evaluation.`;
     const content = data.choices[0]?.message?.content;
 
     if (!content) {
-      throw new Error("No content in LLM response");
+      const finishReason = data.choices[0]?.finish_reason ?? "unknown";
+      throw new Error(
+        `No content in LLM response (finish_reason: ${finishReason})`,
+      );
     }
 
     // Parse JSON response

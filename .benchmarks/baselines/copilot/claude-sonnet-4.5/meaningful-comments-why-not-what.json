@@ -1,7 +1,26 @@
 {
   "scenarioId": "meaningful-comments-why-not-what",
-  "score": 0,
-  "violations": [],
+  "score": 0.65,
+  "violations": [
+    {
+      "type": "llm-judge",
+      "message": "Comments primarily explain 'why' rather than 'what': Several comments restate actions (e.g., 'Build DP table', 'Traverse from bottom-right to top-left', 'Swap rows') instead of explaining rationale.",
+      "severity": "minor",
+      "details": "Helpful algorithmic and complexity comments are present, but several redundant 'what' comments and missing explanations for non-obvious choices reduce comment quality."
+    },
+    {
+      "type": "llm-judge",
+      "message": "Redundant comments are avoided: Multiple comments simply narrate the code (initializing DP, building table, generic backtracking) without adding insight.",
+      "severity": "minor",
+      "details": "Helpful algorithmic and complexity comments are present, but several redundant 'what' comments and missing explanations for non-obvious choices reduce comment quality."
+    },
+    {
+      "type": "llm-judge",
+      "message": "Non-obvious decisions and edge cases are documented: Missing explanations for reversing strings in backtracking, using Set to deduplicate, and resetting the current row in the optimized version; no edge-case notes (e.g., empty strings).",
+      "severity": "minor",
+      "details": "Helpful algorithmic and complexity comments are present, but several redundant 'what' comments and missing explanations for non-obvious choices reduce comment quality."
+    }
+  ],
   "validationResults": [
     {
       "passed": true,
@@ -11,10 +30,28 @@
     },
     {
       "passed": false,
-      "score": 0,
-      "violations": [],
-      "validatorType": "llm-judge",
-      "error": "LLM judge failed: Error: No content in LLM response"
+      "score": 0.65,
+      "violations": [
+        {
+          "type": "llm-judge",
+          "message": "Comments primarily explain 'why' rather than 'what': Several comments restate actions (e.g., 'Build DP table', 'Traverse from bottom-right to top-left', 'Swap rows') instead of explaining rationale.",
+          "severity": "minor",
+          "details": "Helpful algorithmic and complexity comments are present, but several redundant 'what' comments and missing explanations for non-obvious choices reduce comment quality."
+        },
+        {
+          "type": "llm-judge",
+          "message": "Redundant comments are avoided: Multiple comments simply narrate the code (initializing DP, building table, generic backtracking) without adding insight.",
+          "severity": "minor",
+          "details": "Helpful algorithmic and complexity comments are present, but several redundant 'what' comments and missing explanations for non-obvious choices reduce comment quality."
+        },
+        {
+          "type": "llm-judge",
+          "message": "Non-obvious decisions and edge cases are documented: Missing explanations for reversing strings in backtracking, using Set to deduplicate, and resetting the current row in the optimized version; no edge-case notes (e.g., empty strings).",
+          "severity": "minor",
+          "details": "Helpful algorithmic and complexity comments are present, but several redundant 'what' comments and missing explanations for non-obvious choices reduce comment quality."
+        }
+      ],
+      "validatorType": "llm-judge"
     },
     {
       "passed": true,
@@ -23,7 +60,7 @@
       "validatorType": "eslint"
     }
   ],
-  "timestamp": "2026-02-14T21:00:54.805Z",
+  "timestamp": "2026-02-16T03:09:27.345Z",
   "adapter": "copilot",
   "model": "claude-sonnet-4.5"
 }
